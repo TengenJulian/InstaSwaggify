@@ -34,7 +34,7 @@ import zwaggerboyz.instaswaggify.filters.BrightnessFilter;
 import zwaggerboyz.instaswaggify.filters.ColorizeFilter;
 import zwaggerboyz.instaswaggify.filters.ContrastFilter;
 import zwaggerboyz.instaswaggify.filters.GaussianBlurFilter;
-import zwaggerboyz.instaswaggify.filters.IFilter;
+import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
 import zwaggerboyz.instaswaggify.filters.IdentityFilter;
 import zwaggerboyz.instaswaggify.filters.InvertColorsFilter;
 import zwaggerboyz.instaswaggify.filters.NoiseFilter;
@@ -242,7 +242,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mOverlays = overlays;
     }
 
-    public void setFilters(List<IFilter> filters) {
+    public void setFilters(List<AbstractFilterClass> filters) {
         filterRenderer.setFilters(filters);
     }
 

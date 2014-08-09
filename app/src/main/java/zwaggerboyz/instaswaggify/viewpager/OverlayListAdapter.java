@@ -1,21 +1,18 @@
 package zwaggerboyz.instaswaggify.viewpager;
 
 import android.app.Activity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import zwaggerboyz.instaswaggify.HistoryBuffer;
 import zwaggerboyz.instaswaggify.MyGLSurfaceView;
 import zwaggerboyz.instaswaggify.Overlay;
 import zwaggerboyz.instaswaggify.R;
-import zwaggerboyz.instaswaggify.filters.IFilter;
 
 /*
  * APP:     InstaSwaggify

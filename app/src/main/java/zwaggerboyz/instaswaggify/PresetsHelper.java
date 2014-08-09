@@ -21,7 +21,6 @@ import zwaggerboyz.instaswaggify.filters.BrightnessFilter;
 import zwaggerboyz.instaswaggify.filters.ColorizeFilter;
 import zwaggerboyz.instaswaggify.filters.ContrastFilter;
 import zwaggerboyz.instaswaggify.filters.GaussianBlurFilter;
-import zwaggerboyz.instaswaggify.filters.IFilter;
 import zwaggerboyz.instaswaggify.filters.InvertColorsFilter;
 import zwaggerboyz.instaswaggify.filters.NoiseFilter;
 import zwaggerboyz.instaswaggify.filters.RotationFilter;
@@ -35,7 +34,7 @@ import zwaggerboyz.instaswaggify.viewpager.FilterListAdapter;
 public class PresetsHelper {
     private Context mContext;
     private FilterListAdapter mAdapter;
-    private List<IFilter> mFilters;
+    private List<AbstractFilterClass> mFilters;
     private DialogFragment mDialog;
     private PresetsHelperListener mListener = null;
 
@@ -62,7 +61,7 @@ public class PresetsHelper {
         mAdapter = adapter;
     }
 
-    public void showSavePresetDialog(Activity activity, List<IFilter> filters) {
+    public void showSavePresetDialog(Activity activity, List<AbstractFilterClass> filters) {
         FragmentTransaction fragmentTransaction = activity.getFragmentManager().beginTransaction();
         Fragment prev = activity.getFragmentManager().findFragmentByTag("dialog");
         if (prev != null)
@@ -132,7 +131,7 @@ public class PresetsHelper {
         }
     }
 
-    private void savePresetToSharedPrefs(List<IFilter> filters, String title) {
+    private void savePresetToSharedPrefs(List<AbstractFilterClass> filters, String title) {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(PRESET_KEY, Context.MODE_PRIVATE);
         String parseString = sharedPreferences.getString(PRESET_KEY, "");
 
@@ -148,7 +147,7 @@ public class PresetsHelper {
             presetJSONObject.put(PRESET_TITLE_KEY, title);
 
             JSONArray filtersJSONArray = new JSONArray();
-            for (IFilter filter : filters) {
+            for (AbstractFilterClass filter : filters) {
                 JSONObject filterJSONObject = new JSONObject();
                 filterJSONObject.put(FILTER_ID_KEY, filter.getID().ordinal());
                 for (int i = 0; i < 3; i++) {
@@ -169,11 +168,11 @@ public class PresetsHelper {
         }
     }
 
-    private List<IFilter> loadPresetFromSharedPrefs(int id) {
+    private List<AbstractFilterClass> loadPresetFromSharedPrefs(int id) {
         SharedPreferences prefs = mContext.getSharedPreferences(PRESET_KEY, Context.MODE_PRIVATE);
         String parseString = prefs.getString(PRESET_KEY, "");
 
-        List<IFilter> filters = new ArrayList<IFilter>();
+        List<AbstractFilterClass> filters = new ArrayList<AbstractFilterClass>();
         try {
             JSONArray presetsJSONArray = new JSONArray(parseString);
             JSONObject presetJSONObject = presetsJSONArray.getJSONObject(id);
@@ -184,7 +183,7 @@ public class PresetsHelper {
                 JSONObject jSONFilter = filtersJSONArray.getJSONObject(i);
                 AbstractFilterClass.FilterID filterId = AbstractFilterClass.FilterID.values()[jSONFilter.getInt(FILTER_ID_KEY)];
 
-                IFilter filter = null;
+                AbstractFilterClass filter = null;
                 switch (filterId) {
                     case BRIGHTNESS:
                         filter = new BrightnessFilter();

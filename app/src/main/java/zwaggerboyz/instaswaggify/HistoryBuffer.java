@@ -3,7 +3,7 @@ package zwaggerboyz.instaswaggify;
 import java.util.ArrayList;
 import java.util.List;
 
-import zwaggerboyz.instaswaggify.filters.IFilter;
+import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
 import zwaggerboyz.instaswaggify.viewpager.FilterListAdapter;
 import zwaggerboyz.instaswaggify.viewpager.OverlayListAdapter;
 
@@ -20,7 +20,7 @@ public class HistoryBuffer {
         mListener = listener;
     }
 
-    public void updateBuffer(List<IFilter> filterList, List<Overlay> drawableList) {
+    public void updateBuffer(List<AbstractFilterClass> filterList, List<Overlay> drawableList) {
         if (mBufferItems.size() < 25) {
             if (filterList != null)
                 mBufferItems.add(new BufferItem(filterList, null));
@@ -51,14 +51,14 @@ public class HistoryBuffer {
     }
 
     private class BufferItem {
-        ArrayList<IFilter> mIFilterList;
+        ArrayList<AbstractFilterClass> mIFilterList;
         ArrayList<Overlay> mCanvasDraggableItemList;
         int type;
 
-        public BufferItem(List<IFilter> filterList, List<Overlay> overlayList) {
+        public BufferItem(List<AbstractFilterClass> filterList, List<Overlay> overlayList) {
             if (filterList != null && overlayList == null) {
-                mIFilterList = new ArrayList<IFilter>();
-                for(IFilter f : filterList) {
+                mIFilterList = new ArrayList<AbstractFilterClass>();
+                for(AbstractFilterClass f : filterList) {
                     mIFilterList.add(f.clone());
                 }
                 mCanvasDraggableItemList = null;

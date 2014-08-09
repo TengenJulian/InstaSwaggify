@@ -260,8 +260,6 @@ public class TexturedSquare {
      * this shape.
      */
     public void draw(float[] mvpMatrix) {
-        Log.i("mprogram", "" + mProgram);
-
         calcTransformation();
         Matrix.multiplyMM(scratch, 0, mvpMatrix, 0, transformationMatrix, 0);
         Matrix.multiplyMM(boundingBox, 0, transformationMatrix, 0, squareCoords2, 0);

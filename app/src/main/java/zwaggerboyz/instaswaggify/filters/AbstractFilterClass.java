@@ -14,7 +14,7 @@ package zwaggerboyz.instaswaggify.filters;
 
 import zwaggerboyz.instaswaggify.TexturedSquare;
 
-public abstract class AbstractFilterClass extends TexturedSquare implements IFilter {
+public abstract class AbstractFilterClass extends TexturedSquare {
 
     public enum FilterID {
         BRIGHTNESS,
@@ -82,7 +82,6 @@ public abstract class AbstractFilterClass extends TexturedSquare implements IFil
         }
     }
 
-    @Override
     public void draw(float[] mvpMatrix, int fboTexture) {
         setTextureDataHandle(fboTexture);
         super.draw(mvpMatrix);
@@ -93,7 +92,7 @@ public abstract class AbstractFilterClass extends TexturedSquare implements IFil
     }
 
     @Override
-    public IFilter clone() {
+    public AbstractFilterClass clone() {
         return null;
     }
 

@@ -18,7 +18,7 @@ import zwaggerboyz.instaswaggify.filters.BrightnessFilter;
 import zwaggerboyz.instaswaggify.filters.ColorizeFilter;
 import zwaggerboyz.instaswaggify.filters.ContrastFilter;
 import zwaggerboyz.instaswaggify.filters.GaussianBlurFilter;
-import zwaggerboyz.instaswaggify.filters.IFilter;
+import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
 import zwaggerboyz.instaswaggify.filters.InvertColorsFilter;
 import zwaggerboyz.instaswaggify.filters.NoiseFilter;
 import zwaggerboyz.instaswaggify.filters.RotationFilter;
@@ -53,12 +53,12 @@ public class FilterDialog extends DialogFragment {
     private OnAddFilterListener mListener = null;
     ArrayAdapter<String> mAdapter;
 
-    public FilterDialog(Context context, List<IFilter> filters) {
+    public FilterDialog(Context context, List<AbstractFilterClass> filters) {
         List<String> filterNamesList = new ArrayList<String>();
         for (String filterName : mAllFilters)
             filterNamesList.add(filterName);
 
-        for (IFilter filter : filters)
+        for (AbstractFilterClass filter : filters)
             filterNamesList.remove(filter.getName());
 
         String[] filterNames = new String[filterNamesList.size()];
@@ -81,7 +81,7 @@ public class FilterDialog extends DialogFragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int listId, long l) {
                 if (mListener != null) {
-                    IFilter filter = null;
+                    AbstractFilterClass filter = null;
                     int id;
                     for (id = 0; id < mAllFilters.length; id++)
                         if (mAllFilters[id] == mAdapter.getItem(listId))
@@ -131,6 +131,6 @@ public class FilterDialog extends DialogFragment {
         mListener = listener;
     }
     public interface OnAddFilterListener {
-        public void OnAddFilterListener(IFilter filter);
+        public void OnAddFilterListener(AbstractFilterClass filter);
     }
 }

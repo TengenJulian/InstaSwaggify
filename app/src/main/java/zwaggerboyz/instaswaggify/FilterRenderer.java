@@ -6,7 +6,7 @@ import android.opengl.GLES20;
 import java.util.ArrayList;
 import java.util.List;
 
-import zwaggerboyz.instaswaggify.filters.IFilter;
+import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
 import zwaggerboyz.instaswaggify.filters.IdentityFilter;
 
 
@@ -24,7 +24,7 @@ public class FilterRenderer {
     private int[] fboTextures = new int[2];
     private int[] frameBuffers = new int[2];
     private TexturedSquare mBackground;
-    private List<IFilter> mFilters = new ArrayList<IFilter>();
+    private List<AbstractFilterClass> mFilters = new ArrayList<AbstractFilterClass>();
     private IdentityFilter identity;
 
     public FilterRenderer(int width, int height, Bitmap background) {
@@ -119,7 +119,7 @@ public class FilterRenderer {
         outputIndex ^= 1;
 
         for (int i = 0; i < size - skip; i++) {
-            IFilter filter = mFilters.get(i);
+            AbstractFilterClass filter = mFilters.get(i);
 
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, fboTextures[inputIndex]);
@@ -136,7 +136,7 @@ public class FilterRenderer {
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
 
         if (skip == 1) {
-            IFilter filter = mFilters.get(size - 1);
+            AbstractFilterClass filter = mFilters.get(size - 1);
             filter.draw(mvpMatrix, fboTextures[inputIndex]);
         }
         else {
@@ -145,7 +145,7 @@ public class FilterRenderer {
 
     }
 
-    public void setFilters(List<IFilter> filters) {
+    public void setFilters(List<AbstractFilterClass> filters) {
         mFilters = filters;
     }
 }

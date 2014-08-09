@@ -26,7 +26,7 @@ import java.util.List;
 
 import zwaggerboyz.instaswaggify.dialogs.FilterDialog;
 import zwaggerboyz.instaswaggify.dialogs.OverlayDialog;
-import zwaggerboyz.instaswaggify.filters.IFilter;
+import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
 import zwaggerboyz.instaswaggify.viewpager.FilterListAdapter;
 import zwaggerboyz.instaswaggify.viewpager.ListViewPagerAdapter;
 import zwaggerboyz.instaswaggify.viewpager.OverlayListAdapter;
@@ -88,7 +88,7 @@ public class MainActivity extends FragmentActivity
 
 
         List<Overlay> overlays = new ArrayList<Overlay>();
-        mFilterAdapter = new FilterListAdapter(this, this, new ArrayList<IFilter>(), mHistoryBuffer);
+        mFilterAdapter = new FilterListAdapter(this, this, new ArrayList<AbstractFilterClass>(), mHistoryBuffer);
         mOverlayAdapter = new OverlayListAdapter(this, this, mGLSurfaceView, overlays, mHistoryBuffer);
         mGLSurfaceView.setOverlays(overlays);
         //mCanvasView.setOverlays(overlays);
@@ -288,12 +288,12 @@ public class MainActivity extends FragmentActivity
     }
 
     @Override
-    public void updateImage(List<IFilter> filters) {
+    public void updateImage(List<AbstractFilterClass> filters) {
         updateImage(filters, false);
     }
 
     @Override
-    public void updateImage(List<IFilter> filters, boolean forceUpdate) {
+    public void updateImage(List<AbstractFilterClass> filters, boolean forceUpdate) {
         mRenderer.setFilters(filters);
         mGLSurfaceView.requestRender();
     }
@@ -339,7 +339,7 @@ public class MainActivity extends FragmentActivity
     }
 
     @Override
-    public void OnAddFilterListener(IFilter filter) {
+    public void OnAddFilterListener(AbstractFilterClass filter) {
         mDialog.dismiss();
         mFilterAdapter.addItem(filter);
     }

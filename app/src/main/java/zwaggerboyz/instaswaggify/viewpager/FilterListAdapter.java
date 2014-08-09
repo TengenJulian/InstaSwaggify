@@ -8,13 +8,12 @@ import android.widget.BaseAdapter;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import zwaggerboyz.instaswaggify.HistoryBuffer;
 import zwaggerboyz.instaswaggify.R;
 import zwaggerboyz.instaswaggify.TexturedSquare;
-import zwaggerboyz.instaswaggify.filters.IFilter;
+import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
 
 /*
  * APP:     InstaSwaggify
@@ -28,7 +27,7 @@ import zwaggerboyz.instaswaggify.filters.IFilter;
 
 public class FilterListAdapter extends BaseAdapter {
     private final LayoutInflater mInflater;
-    private List<IFilter> mItems;
+    private List<AbstractFilterClass> mItems;
     private FilterListInterface mListener;
     private HistoryBuffer mHistoryBuffer;
 
@@ -37,7 +36,7 @@ public class FilterListAdapter extends BaseAdapter {
         public SeekBar slider1Seekbar, slider2Seekbar, slider3Seekbar;
     }
 
-    public FilterListAdapter(Activity activity, FilterListInterface listener, List<IFilter> items, HistoryBuffer historyBuffer) {
+    public FilterListAdapter(Activity activity, FilterListInterface listener, List<AbstractFilterClass> items, HistoryBuffer historyBuffer) {
         mInflater = activity.getLayoutInflater();
         mItems = items;
         mListener = listener;
@@ -50,15 +49,15 @@ public class FilterListAdapter extends BaseAdapter {
     }
 
     @Override
-    public IFilter getItem(int position) {
+    public AbstractFilterClass getItem(int position) {
         return mItems.get(position);
     }
 
-    public void setItems(List<IFilter> items) {
+    public void setItems(List<AbstractFilterClass> items) {
         setItems(items, true);
     }
 
-    public void setItems(List<IFilter> items, boolean isUndoable) {
+    public void setItems(List<AbstractFilterClass> items, boolean isUndoable) {
         if (isUndoable)
             mHistoryBuffer.updateBuffer(mItems, null);
 
@@ -100,7 +99,7 @@ public class FilterListAdapter extends BaseAdapter {
             viewHolder = (ViewHolder)convertView.getTag();
         }
 
-        final IFilter item = getItem(position);
+        final AbstractFilterClass item = getItem(position);
         viewHolder.titleTextView.setText(item.getName());
 
         /**
@@ -234,7 +233,7 @@ public class FilterListAdapter extends BaseAdapter {
         return true;
     }
 
-    public List<IFilter> getItems() {
+    public List<AbstractFilterClass> getItems() {
         return mItems;
     }
 
@@ -254,7 +253,7 @@ public class FilterListAdapter extends BaseAdapter {
         if (from != to) {
             mHistoryBuffer.updateBuffer(mItems, null);
 
-            IFilter element = mItems.remove(from);
+            AbstractFilterClass element = mItems.remove(from);
             mItems.add(to, element);
 
             notifyDataSetChanged();
@@ -262,7 +261,7 @@ public class FilterListAdapter extends BaseAdapter {
         }
     }
 
-    public void addItem(IFilter filter) {
+    public void addItem(AbstractFilterClass filter) {
         mHistoryBuffer.updateBuffer(mItems, null);
         mItems.add(filter);
         mListener.filtersNotEmpty();
@@ -283,8 +282,8 @@ public class FilterListAdapter extends BaseAdapter {
     }
 
     public interface FilterListInterface {
-        public void updateImage(List<IFilter> filters);
-        public void updateImage(List<IFilter> filters, boolean forceUpdate);
+        public void updateImage(List<AbstractFilterClass> filters);
+        public void updateImage(List<AbstractFilterClass> filters, boolean forceUpdate);
         public void filtersEmpty();
         public void filtersNotEmpty();
         public void addFilterToCompileQueue(TexturedSquare filter);

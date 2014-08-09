@@ -20,7 +20,7 @@ public class HistoryBuffer {
         mListener = listener;
     }
 
-    public void updateBuffer(List<IFilter> filterList, List<CanvasDraggableItem> drawableList) {
+    public void updateBuffer(List<IFilter> filterList, List<Overlay> drawableList) {
         if (mBufferItems.size() < 25) {
             if (filterList != null)
                 mBufferItems.add(new BufferItem(filterList, null));
@@ -44,9 +44,6 @@ public class HistoryBuffer {
             filters.updateList();
         } else {
             overlays.setItems(temp.mCanvasDraggableItemList);
-            for (int i = 0; i < overlays.getItems().size(); i++) {
-                overlays.getItems().get(i).wiggle();
-            }
         }
 
         if(mBufferItems.size() == 0)
@@ -55,10 +52,10 @@ public class HistoryBuffer {
 
     private class BufferItem {
         ArrayList<IFilter> mIFilterList;
-        ArrayList<CanvasDraggableItem> mCanvasDraggableItemList;
+        ArrayList<Overlay> mCanvasDraggableItemList;
         int type;
 
-        public BufferItem(List<IFilter> filterList, List<CanvasDraggableItem> overlayList) {
+        public BufferItem(List<IFilter> filterList, List<Overlay> overlayList) {
             if (filterList != null && overlayList == null) {
                 mIFilterList = new ArrayList<IFilter>();
                 for(IFilter f : filterList) {
@@ -68,8 +65,8 @@ public class HistoryBuffer {
                 type = 0;
             } else {
                 mIFilterList = null;
-                mCanvasDraggableItemList = new ArrayList<CanvasDraggableItem>();
-                for(CanvasDraggableItem c : overlayList) {
+                mCanvasDraggableItemList = new ArrayList<Overlay>();
+                for(Overlay c : overlayList) {
                     mCanvasDraggableItemList.add(c.clone());
                 }
                 type = 1;

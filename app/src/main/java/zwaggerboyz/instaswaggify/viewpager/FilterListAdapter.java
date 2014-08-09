@@ -13,6 +13,7 @@ import java.util.List;
 
 import zwaggerboyz.instaswaggify.HistoryBuffer;
 import zwaggerboyz.instaswaggify.R;
+import zwaggerboyz.instaswaggify.TexturedSquare;
 import zwaggerboyz.instaswaggify.filters.IFilter;
 
 /*
@@ -164,7 +165,7 @@ public class FilterListAdapter extends BaseAdapter {
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     if (fromUser) {
                         item.setValue(0, progress);
-                        mListener.updateImage(mItems, false, false);
+                        mListener.updateImage(mItems);
                     }
                 }
 
@@ -176,7 +177,7 @@ public class FilterListAdapter extends BaseAdapter {
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
                     //item.setValue(0, seekBar.getProgress());
-                    mListener.updateImage(mItems, false, true);
+                    mListener.updateImage(mItems, true);
                 }
             });
         }
@@ -187,7 +188,7 @@ public class FilterListAdapter extends BaseAdapter {
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     if (fromUser) {
                         item.setValue(1, progress);
-                        mListener.updateImage(mItems, false, false);
+                        mListener.updateImage(mItems);
                     }
                 }
 
@@ -199,7 +200,7 @@ public class FilterListAdapter extends BaseAdapter {
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
                     //item.setValue(1, seekBar.getProgress());
-                    mListener.updateImage(mItems, false, true);
+                    mListener.updateImage(mItems, true);
                 }
             });
         }
@@ -210,7 +211,7 @@ public class FilterListAdapter extends BaseAdapter {
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     if (fromUser) {
                         item.setValue(2, progress);
-                        mListener.updateImage(mItems, false, false);
+                        mListener.updateImage(mItems);
                     }
                 }
 
@@ -220,7 +221,7 @@ public class FilterListAdapter extends BaseAdapter {
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
                     //item.setValue(2, seekBar.getProgress());
-                    mListener.updateImage(mItems, false, true);
+                    mListener.updateImage(mItems, true);
                 }
             });
         }
@@ -264,6 +265,7 @@ public class FilterListAdapter extends BaseAdapter {
     public void addItem(IFilter filter) {
         mHistoryBuffer.updateBuffer(mItems, null);
         mItems.add(filter);
+        mListener.addFilterToCompileQueue(filter.getTextureSquare());
         mListener.filtersNotEmpty();
         updateList();
     }
@@ -283,9 +285,10 @@ public class FilterListAdapter extends BaseAdapter {
 
     public interface FilterListInterface {
         public void updateImage(List<IFilter> filters);
-        public void updateImage(List<IFilter> filters, boolean listChanged, boolean forceUpdate);
+        public void updateImage(List<IFilter> filters, boolean forceUpdate);
         public void filtersEmpty();
         public void filtersNotEmpty();
+        public void addFilterToCompileQueue(TexturedSquare filter);
     }
 }
 

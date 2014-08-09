@@ -1,11 +1,6 @@
 package zwaggerboyz.instaswaggify.filters;
 
-import android.renderscript.Allocation;
-import android.renderscript.RenderScript;
-import android.renderscript.Script;
-import android.util.Log;
 
-import zwaggerboyz.instaswaggify.ScriptC_brightness;
 
 /*
  * APP:     InstaSwaggify
@@ -19,8 +14,6 @@ import zwaggerboyz.instaswaggify.ScriptC_brightness;
  */
 
 public class BrightnessFilter extends AbstractFilterClass {
-    ScriptC_brightness mScript;
-
     public BrightnessFilter() {
         mID = FilterID.BRIGHTNESS;
         mName = "Brightness";
@@ -37,29 +30,9 @@ public class BrightnessFilter extends AbstractFilterClass {
         };
     }
 
-    @Override
-    public void setRS(RenderScript rs) {
-        if (mRS != rs) {
-            mRS = rs;
-            mScript = new ScriptC_brightness(mRS);
-        }
-    }
-
-    @Override
-    public void setInput(Allocation allocation) { }
-
-    @Override
+    //@Override
     public void updateInternalValues() {
-        mScript.set_brightnessValue(normalizeValue(mValues[0], 0.5f, 2.f));
+        //mScript.set_brightnessValue(normalizeValue(mValues[0], 0.5f, 2.f));
     }
 
-    @Override
-    public Script.KernelID getKernelId() {
-        return mScript.getKernelID_brightness();
-    }
-
-    @Override
-    public Script.FieldID getFieldId() {
-        return null;
-    }
 }

@@ -1,10 +1,5 @@
 package zwaggerboyz.instaswaggify.filters;
 
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.Script;
-import android.renderscript.ScriptIntrinsicBlur;
 
 /*
  * APP:     InstaSwaggify
@@ -18,7 +13,6 @@ import android.renderscript.ScriptIntrinsicBlur;
  */
 
 public class GaussianBlurFilter extends AbstractFilterClass {
-    ScriptIntrinsicBlur mScript;
 
     public GaussianBlurFilter() {
         mID = FilterID.GAUSSIAN;
@@ -36,31 +30,11 @@ public class GaussianBlurFilter extends AbstractFilterClass {
         };
     }
 
-    @Override
-    public void setRS(RenderScript rs) {
-        if (mRS != rs) {
-            mRS = rs;
-            mScript = ScriptIntrinsicBlur.create(mRS, Element.U8_4(mRS));
-        }
-    }
-
-    @Override
-    public void setInput(Allocation allocation) {
-        mScript.setInput(allocation);
-    }
-
-    @Override
+    //@Override
+/*
     public void updateInternalValues() {
         mScript.setRadius(normalizeValue(mValues[0], 1.f, 20.f));
     }
+*/
 
-    @Override
-    public Script.KernelID getKernelId() {
-        return mScript.getKernelID();
-    }
-
-    @Override
-    public Script.FieldID getFieldId() {
-        return mScript.getFieldID_Input();
-    }
 }

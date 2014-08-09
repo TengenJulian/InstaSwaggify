@@ -11,9 +11,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import zwaggerboyz.instaswaggify.CanvasDraggableItem;
-import zwaggerboyz.instaswaggify.CanvasView;
 import zwaggerboyz.instaswaggify.HistoryBuffer;
+import zwaggerboyz.instaswaggify.MyGLSurfaceView;
+import zwaggerboyz.instaswaggify.Overlay;
 import zwaggerboyz.instaswaggify.R;
 import zwaggerboyz.instaswaggify.filters.IFilter;
 
@@ -27,24 +27,24 @@ import zwaggerboyz.instaswaggify.filters.IFilter;
  * This file contains the adapter to change the list of currently selected overlays.
  */
 
-public class OverlayListAdapter extends BaseAdapter implements CanvasView.onOverlayChangeListener {
+public class OverlayListAdapter extends BaseAdapter implements MyGLSurfaceView.onOverlayChangeListener {
     private LayoutInflater mInflater;
-    private CanvasView mCanvasView;
+    private MyGLSurfaceView mGLSurfaceView;
     private OverlayListInterface mListener;
-    private List<CanvasDraggableItem> mItems;
+    private List<Overlay> mItems;
     private HistoryBuffer mHistoryBuffer;
 
     private class ViewHolder {
         TextView titleTextView;
     }
 
-    public OverlayListAdapter(Activity activity, OverlayListInterface listener, CanvasView canvasView, List<CanvasDraggableItem> items, HistoryBuffer historyBuffer) {
+    public OverlayListAdapter(Activity activity, OverlayListInterface listener, MyGLSurfaceView surfaceView, List<Overlay> items, HistoryBuffer historyBuffer) {
         mInflater = activity.getLayoutInflater();
         mListener = listener;
-        mCanvasView = canvasView;
+        mGLSurfaceView = surfaceView;
         mItems = items;
         mHistoryBuffer = historyBuffer;
-        mCanvasView.setOnOverlayChangeListener(this);
+        mGLSurfaceView.setOnOverlayChangeListener(this);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class OverlayListAdapter extends BaseAdapter implements CanvasView.onOver
     }
 
     @Override
-    public CanvasDraggableItem getItem(int position) {
+    public Overlay getItem(int position) {
         return mItems.get(position);
     }
 
@@ -81,19 +81,21 @@ public class OverlayListAdapter extends BaseAdapter implements CanvasView.onOver
 
         viewHolder.titleTextView.setText(getItem(position).getName());
 
-
         return convertView;
     }
 
-    public List<CanvasDraggableItem> getItems() {
+    public List<Overlay> getItems() {
         return mItems;
     }
 
     /* Removes item at index from filter list */
     public void remove(int index) {
         mHistoryBuffer.updateBuffer(null, mItems);
-        mItems.remove(mItems.get(index));
-        mCanvasView.invalidate();
+
+        Overlay overlay =  mItems.remove(index);
+        overlay.close();
+
+        mGLSurfaceView.requestRender();
         if (mItems.size() == 0)
             mListener.overlaysEmpty();
         notifyDataSetChanged();
@@ -102,43 +104,45 @@ public class OverlayListAdapter extends BaseAdapter implements CanvasView.onOver
     public void reorder(int from, int to) {
         if (from != to) {
             mHistoryBuffer.updateBuffer(null, mItems);
-            CanvasDraggableItem element = mItems.remove(from);
+            Overlay element = mItems.remove(from);
             mItems.add(to, element);
 
-            mCanvasView.invalidate();
+            mGLSurfaceView.requestRender();
             notifyDataSetChanged();
         }
     }
 
-    public void addItem(CanvasDraggableItem overlay) {
+    public void addItem(Overlay overlay) {
         mHistoryBuffer.updateBuffer(null, mItems);
         mItems.add(0, overlay);
-        mCanvasView.invalidate();
+        mGLSurfaceView.addToCompileQueue(overlay);
+        mGLSurfaceView.requestRender();
         mListener.overlaysNotEmpty();
         notifyDataSetChanged();
     }
 
     public void clearOverlays() {
         mHistoryBuffer.updateBuffer(null, mItems);
+
+        for(Overlay overlay : mItems){
+            overlay.close();
+        }
+
         mItems.clear();
-        mCanvasView.invalidate();
+        mGLSurfaceView.requestRender();
         mListener.overlaysEmpty();
         notifyDataSetChanged();
     }
 
-    public void setItems(List<CanvasDraggableItem> items) {
+    public void setItems(List<Overlay> items) {
+        for(Overlay overlay : mItems){
+            overlay.close();
+        }
+
         mItems.clear();
         mItems.addAll(items);
-        mCanvasView.invalidate();
+        mGLSurfaceView.requestRender();
         notifyDataSetChanged();
-    }
-
-    public void setSelected(CanvasDraggableItem selected) {
-        mCanvasView.setSelectedOverlay(selected);
-    }
-
-    public CanvasDraggableItem getSelected() {
-        return mCanvasView.getSelectedOverlay();
     }
 
     @Override
@@ -146,8 +150,9 @@ public class OverlayListAdapter extends BaseAdapter implements CanvasView.onOver
         mHistoryBuffer.updateBuffer(null, mItems);
     }
 
-    public void invalidateCanvas() {
-        mCanvasView.invalidate();
+    public void requestRender() {
+        mGLSurfaceView.requestRender();
+
     }
 
     public interface OverlayListInterface {

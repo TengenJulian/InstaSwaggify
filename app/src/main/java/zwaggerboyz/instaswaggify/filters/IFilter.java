@@ -1,10 +1,6 @@
 package zwaggerboyz.instaswaggify.filters;
 
 
-import android.renderscript.Allocation;
-import android.renderscript.RenderScript;
-import android.renderscript.Script;
-
 /*
  * APP:     InstaSwaggify
  * DATE:    June 2014
@@ -14,6 +10,9 @@ import android.renderscript.Script;
  * FILE:    IFILTER.java
  * This file contains interface for the filter-classes.
  */
+
+
+import zwaggerboyz.instaswaggify.TexturedSquare;
 
 public interface IFilter {
 
@@ -27,21 +26,17 @@ public interface IFilter {
 
     public void setValue(int i, int value);
 
-    public void setRS(RenderScript rs);
-
     public int getNumValues();
 
-    public void updateInternalValues();
+    public void setArray(int[] array);
 
-    public void setDimensions(int imageHeight, int imageWidth);
+    public void draw(float[] mvpMatrix, int fboTexture);
 
-    public void setInput(Allocation input);
+    public void setTextureDataHandle(int texture);
 
-    public Script.KernelID getKernelId();
-
-    public Script.FieldID getFieldId();
+    public TexturedSquare getTextureSquare();
 
     public IFilter clone();
 
-    public void setArray(int[] array);
+    public void close();
 }

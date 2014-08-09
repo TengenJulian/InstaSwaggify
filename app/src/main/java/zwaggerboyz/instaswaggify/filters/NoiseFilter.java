@@ -1,10 +1,5 @@
 package zwaggerboyz.instaswaggify.filters;
 
-import android.renderscript.Allocation;
-import android.renderscript.RenderScript;
-import android.renderscript.Script;
-
-import zwaggerboyz.instaswaggify.ScriptC_noise;
 
 /*
  * APP:     InstaSwaggify
@@ -18,7 +13,6 @@ import zwaggerboyz.instaswaggify.ScriptC_noise;
  */
 
 public class NoiseFilter extends AbstractFilterClass {
-    ScriptC_noise mScript;
 
     public NoiseFilter() {
         mName = "Noise";
@@ -26,39 +20,18 @@ public class NoiseFilter extends AbstractFilterClass {
         mID = FilterID.NOISE;
 
         /* slider label */
-        mLabels = new String[] {
+        mLabels = new String[]{
                 "intensity"
         };
 
         /* slider default value */
-        mValues = new int[] {
+        mValues = new int[]{
                 0
         };
     }
 
-    @Override
-    public void setRS(RenderScript rs) {
-        if (mRS != rs) {
-            mRS = rs;
-            mScript = new ScriptC_noise(mRS);
-        }
-    }
-
-    @Override
-    public void setInput(Allocation allocation) { }
-
-    @Override
-    public void updateInternalValues() {
+    //@Override
+/*    public void updateInternalValues() {
         mScript.set_noiseValue(normalizeValue(mValues[0], 0.f, 0.25f));
-    }
-
-    @Override
-    public Script.KernelID getKernelId() {
-        return mScript.getKernelID_noise();
-    }
-
-    @Override
-    public Script.FieldID getFieldId() {
-        return null;
-    }
+    }*/
 }

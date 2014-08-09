@@ -19,7 +19,9 @@ package zwaggerboyz.instaswaggify;
  * A two-dimensional square for use as a drawn object in OpenGL ES 2.0.
  */
 public class BoundingBox extends TexturedSquare {
-    protected String fragmentShaderCode =
+    private static int ProgramStatic;
+
+    public final static String fragmentShaderCode =
             "precision mediump float;" +
             "uniform sampler2D u_Texture;" +
             "varying vec2 TexCoordinate;" +
@@ -28,9 +30,12 @@ public class BoundingBox extends TexturedSquare {
             "  gl_FragColor = vec4(0.75, 0.5, 0.5, 0.5);" +
             "}";
 
+    public static void compileProgram(String vertexShaderCode, String fragmentShaderCode) {
+        ProgramStatic = compileProgramHelper(vertexShaderCode, fragmentShaderCode);
+    }
+
     public BoundingBox(float width, float height) {
         super();
-        super.fragmentShaderCode = fragmentShaderCode;
 
         if (width > height) {
             scaleX = 1;
@@ -41,8 +46,6 @@ public class BoundingBox extends TexturedSquare {
             scaleX = width / height;
             scaleY = 1;
         }
-
-        allocateBuffers();
-        compileProgram();
+        mProgram = ProgramStatic;
     }
 }

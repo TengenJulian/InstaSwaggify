@@ -89,9 +89,7 @@ public abstract class AbstractFilterClass extends TexturedSquare implements IFil
     }
 
     @Override
-    public void compile() {
-        allocateBuffers();
-        compileProgram();
+    public void allocateAndCompile() {
     }
 
     @Override

@@ -37,7 +37,7 @@ public class FilterRenderer {
         background.recycle();
         createFrameBuffers();
         identity = new IdentityFilter();
-        identity.compile();
+        identity.allocateAndCompile();
     }
 
     private void recreateFrameBuffers() {

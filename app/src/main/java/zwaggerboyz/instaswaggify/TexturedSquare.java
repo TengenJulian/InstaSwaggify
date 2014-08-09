@@ -31,7 +31,7 @@ import java.util.Arrays;
 public class TexturedSquare {
 
     protected void printCoords() {
-        printSquare3("coords", squareCoords);
+        printSquare4("coords", squareCoords2);
     }
 
     public static void printSquare4(String name, float matrix[]) {
@@ -46,7 +46,7 @@ public class TexturedSquare {
         }
     }
 
-    protected String vertexShaderCode =
+    public final static String vertexShaderCode =
             // This matrix member variable provides a hook to manipulate
             // the coordinates of the objects that use this vertex shader
             "attribute vec2 texCoordinate;" +
@@ -62,7 +62,7 @@ public class TexturedSquare {
             "  gl_Position = uMVPMatrix * position;" +
             "}";
 
-    protected String fragmentShaderCode =
+    public final static String fragmentShaderCode =
             "precision mediump float;" +
             "uniform sampler2D u_Texture;" +
             "varying vec2 TexCoordinate;" +
@@ -71,13 +71,13 @@ public class TexturedSquare {
             "  gl_FragColor = texture2D(u_Texture, TexCoordinate);" +
             "}";
 
-    protected FloatBuffer textureBuffer;	// buffer holding the texture coordinates
-    protected FloatBuffer vertexBuffer;
-    protected ShortBuffer drawListBuffer;
-    protected int mProgram;
 
-    private int mPositionHandle;
-    private int mMVPMatrixHandle;
+    private static int drawListBuffer;
+    private static int ProgramStatic;
+    public int mProgram;
+
+    private static int mPositionHandle;
+    private static int mMVPMatrixHandle;
 
     protected String positionAttrName = "position";
     protected String textureAttrName = "texCoordinate";
@@ -97,72 +97,93 @@ public class TexturedSquare {
     protected float angle   = 0;
 
     // number of coordinates per vertex in this array
-    static final int COORDS_PER_VERTEX = 3;
 
-    static float squareCoords[] = {
-            -1f,  1f, 0.0f,   // top left
-            -1f, -1f, 0.0f,   // bottom left
-             1f, -1f, 0.0f,   // bottom right
-             1f,  1f, 0.0f }; // top right
+    private static final int COORDS_PER_VERTEX = 3;
+    private static final int BYTES_PER_FLOAT = 4;
+    private static final int BYTES_PER_SHORT = 2;
+    private static final int NUM_VERTICES = 6;
+    private static final int byteSizePositionData = COORDS_PER_VERTEX * 4 *BYTES_PER_FLOAT;
+    private static final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    static float squareCoords2[] = {
+    private static int vertexDataBuffer;
+
+    protected float squareCoords2[] = {
             -1f,  1f, 0.0f, 1f,   // top left
             -1f, -1f, 0.0f, 1f,   // bottom left
-             1f, -1f, 0.0f, 1f, // bottom right
-             1f,  1f, 0.0f, 1f }; // top right
+            1f, -1f, 0.0f, 1f, // bottom right
+            1f,  1f, 0.0f, 1f }; // top right
 
-
-    static float textureCoords[] = {
-            // Mapping coordinates for the vertices
-            1.0f, 0.0f,		// top right	(V4)
-            1.0f, 1.0f,		// bottom right	(V3)
-            0.0f, 1.0f,		// top left		(V2)
-            0.0f, 0.0f,		// bottom left	(V1)
-    };
 
     /** This will be used to pass in the texture. */
-    private int mTextureUniformHandle;
+    private static int mTextureUniformHandle;
 
     /** This will be used to pass in model texture coordinate information. */
-    private int mTextureCoordinateHandle;
+    private static int mTextureCoordinateHandle;
 
     /** Size of the texture coordinate data in elements. */
-    private final int mTextureCoordinateDataSize = 2;
+    private static final int mTextureCoordinateDataSize = 2;
 
     /** This is a handle to our texture data. */
     protected int mTextureDataHandle;
 
-    private final short drawOrder[] = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
+    static void allocateBuffers() {
+        final float vertexData[] = {
+                -1f,  1f, 0.0f,   // top left
+                -1f, -1f, 0.0f,   // bottom left
+                1f, -1f, 0.0f,   // bottom right
+                1f,  1f, 0.0f,  // top right
 
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+                // texture coordinates
+                // Mapping coordinates for the vertices
+                1.0f, 0.0f,		// top right	(V4)
+                1.0f, 1.0f,		// bottom right	(V3)
+                0.0f, 1.0f,		// top left		(V2)
+                0.0f, 0.0f,		// bottom left	(V1)
 
-    protected void allocateBuffers() {
+        };
+
+        //draw Order
+        final short[] drawOrder = {0, 1, 2, 0, 2, 3}; // order to draw vertices
+
         // initialize vertex byte buffer for shape coordinates
+        int scratch[] = new int[2];
+
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 // (# of coordinate values * 4 bytes per float)
-                squareCoords.length * 4);
+                vertexData.length * 4);
         bb.order(ByteOrder.nativeOrder());
-        vertexBuffer = bb.asFloatBuffer();
-        vertexBuffer.put(squareCoords);
+
+        FloatBuffer vertexBuffer = bb.asFloatBuffer();
+        vertexBuffer.put(vertexData);
         vertexBuffer.position(0);
 
-        ByteBuffer bb2 = ByteBuffer.allocateDirect(textureCoords.length * 4);
-        bb2.order(ByteOrder.nativeOrder());
-        textureBuffer = bb2.asFloatBuffer();
-        textureBuffer.put(textureCoords);
-        textureBuffer.position(0);
+        GLES20.glGenBuffers(2, scratch, 0);
+        vertexDataBuffer = scratch[0];
+        drawListBuffer = scratch[1];
+
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexDataBuffer);
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, vertexBuffer.capacity() * BYTES_PER_FLOAT, vertexBuffer, GLES20.GL_STATIC_DRAW);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
         // initialize byte buffer for the draw list
         ByteBuffer dlb = ByteBuffer.allocateDirect(
-                // (# of coordinate values * 2 bytes per short)
+        // (# of coordinate values * 2 bytes per short)
                 drawOrder.length * 2);
         dlb.order(ByteOrder.nativeOrder());
-        drawListBuffer = dlb.asShortBuffer();
-        drawListBuffer.put(drawOrder);
-        drawListBuffer.position(0);
+        ShortBuffer shortBuffer = dlb.asShortBuffer();
+        shortBuffer.put(drawOrder);
+        shortBuffer.position(0);
+
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, drawListBuffer);
+        GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, shortBuffer.capacity() * BYTES_PER_SHORT, shortBuffer, GLES20.GL_STATIC_DRAW);
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
-    protected void compileProgram(){
+    public static void compileProgram(String vertexShaderCode, String fragmentShaderCode) {
+        ProgramStatic = compileProgramHelper(vertexShaderCode, fragmentShaderCode);
+    }
+
+    public static int compileProgramHelper(String vertexShaderCode, String fragmentShaderCode){
         // prepare shaders and OpenGL program
         int vertexShader = GLHelper.loadShader(
                 GLES20.GL_VERTEX_SHADER,
@@ -171,31 +192,29 @@ public class TexturedSquare {
                 GLES20.GL_FRAGMENT_SHADER,
                 fragmentShaderCode);
 
-        mProgram = GLES20.glCreateProgram();             // create empty OpenGL Program
-        GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
-        GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
-        GLES20.glBindAttribLocation(mProgram, 0, "texCoordinate");
-        GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
+        int program = GLES20.glCreateProgram();             // create empty OpenGL Program
+        GLES20.glAttachShader(program, vertexShader);   // add the vertex shader to program
+        GLES20.glAttachShader(program, fragmentShader); // add the fragment shader to program
+        GLES20.glBindAttribLocation(program, 0, "texCoordinate");
+        GLES20.glLinkProgram(program);                  // create OpenGL program executables
 
         // Get the link status.
         final int[] linkStatus = new int[1];
-        GLES20.glGetProgramiv(mProgram, GLES20.GL_LINK_STATUS, linkStatus, 0);
+        GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS, linkStatus, 0);
 
         // If the link failed, delete the program.
         if (linkStatus[0] == 0) {
             throw new RuntimeException("Error creating program.");
         }
-
-        GLES20.glGetIntegerv(GLES20.GL_VIEWPORT, viewport, 0);
-        Log.i("viewport dimensions", "" + viewport[0]+", " + viewport[1] + ", " + viewport[2] + ", "+ viewport[3]);
-
+        return program;
     }
 
-    public void compile() {
-
+    public void allocateAndCompile() {
     }
 
-    protected TexturedSquare() {}
+    protected TexturedSquare() {
+        mProgram = ProgramStatic;
+    }
 
     /**
      * Sets up the drawing object data for use in an OpenGL ES mContext.
@@ -204,10 +223,8 @@ public class TexturedSquare {
         baseScaleX = width / height;
         baseScaleY = 1;
 
+        mProgram = ProgramStatic;
         mTextureDataHandle = textureHandle;
-        allocateBuffers();
-        compileProgram();
-
     }
 
     protected void specifyVariableHandles() {
@@ -221,6 +238,9 @@ public class TexturedSquare {
         GLHelper.checkGlError("mTectureUniformHandle");
 
         mPositionHandle = GLES20.glGetAttribLocation(mProgram, "position");
+
+        // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
+        GLES20.glUniform1i(mTextureUniformHandle, 0);
 
         specifyExtraVariableHandles();
     }
@@ -240,50 +260,53 @@ public class TexturedSquare {
      * this shape.
      */
     public void draw(float[] mvpMatrix) {
-        // Add program to OpenGL environment
+        Log.i("mprogram", "" + mProgram);
 
         calcTransformation();
         Matrix.multiplyMM(scratch, 0, mvpMatrix, 0, transformationMatrix, 0);
         Matrix.multiplyMM(boundingBox, 0, transformationMatrix, 0, squareCoords2, 0);
 
+
         GLES20.glUseProgram(mProgram);
         specifyVariableHandles();
-
-        // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
-        GLES20.glUniform1i(mTextureUniformHandle, 0);
         bindExtraVariableHandles();
+
+
+        // Apply the projection and view transformation
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, scratch, 0);
+
 
         // Set the active texture unit to texture unit 0.
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-
-        // Bind the texture to this unit.
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureDataHandle);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexDataBuffer);
+
 
         // Prepare the triangle coordinate data
         GLES20.glVertexAttribPointer(
                 mPositionHandle, COORDS_PER_VERTEX,
                 GLES20.GL_FLOAT, false,
-                vertexStride, vertexBuffer);
-
-        // Enable a handle to the triangle vertices
+                vertexStride, 0);
         GLES20.glEnableVertexAttribArray(mPositionHandle);
 
+
         // Pass in the texture coordinate information
-        textureBuffer.position(0);
         GLES20.glVertexAttribPointer(
                 mTextureCoordinateHandle, mTextureCoordinateDataSize,
                 GLES20.GL_FLOAT, false,
-                0, textureBuffer);
-
+                0, byteSizePositionData);
         GLES20.glEnableVertexAttribArray(mTextureCoordinateHandle);
 
-        // Apply the projection and view transformation
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, scratch, 0);
 
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, drawListBuffer);
         // Draw the square
         GLES20.glDrawElements(
-                GLES20.GL_TRIANGLES, drawOrder.length,
-                GLES20.GL_UNSIGNED_SHORT, drawListBuffer);
+                GLES20.GL_TRIANGLES, NUM_VERTICES,
+                GLES20.GL_UNSIGNED_SHORT, 0);
+
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);

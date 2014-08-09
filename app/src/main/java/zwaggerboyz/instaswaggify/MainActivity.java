@@ -102,8 +102,8 @@ public class MainActivity extends FragmentActivity
         slidingTabLayout.setOnPageChangeListener(this);
 
         /* plays a sound without blocking the app's execution */
-        SoundThread soundThread = new SoundThread(this, R.raw.instafrenchecho);
-        soundThread.start();
+        //SoundThread soundThread = new SoundThread(this, R.raw.instafrenchecho);
+        //soundThread.start();
 
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if (type.startsWith("image/")) {
@@ -294,8 +294,8 @@ public class MainActivity extends FragmentActivity
 
     @Override
     public void updateImage(List<IFilter> filters, boolean forceUpdate) {
+        mRenderer.setFilters(filters);
         mGLSurfaceView.requestRender();
-        mRenderer.seFilters(filters);
     }
 
     @Override

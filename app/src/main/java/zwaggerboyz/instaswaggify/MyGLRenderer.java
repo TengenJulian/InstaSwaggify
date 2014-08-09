@@ -15,7 +15,6 @@
  */
 package zwaggerboyz.instaswaggify;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
@@ -31,7 +30,18 @@ import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import zwaggerboyz.instaswaggify.filters.BrightnessFilter;
+import zwaggerboyz.instaswaggify.filters.ColorizeFilter;
+import zwaggerboyz.instaswaggify.filters.ContrastFilter;
+import zwaggerboyz.instaswaggify.filters.GaussianBlurFilter;
 import zwaggerboyz.instaswaggify.filters.IFilter;
+import zwaggerboyz.instaswaggify.filters.IdentityFilter;
+import zwaggerboyz.instaswaggify.filters.InvertColorsFilter;
+import zwaggerboyz.instaswaggify.filters.NoiseFilter;
+import zwaggerboyz.instaswaggify.filters.RotationFilter;
+import zwaggerboyz.instaswaggify.filters.SaturationFilter;
+import zwaggerboyz.instaswaggify.filters.SepiaFilter;
+import zwaggerboyz.instaswaggify.filters.ThresholdBlurFilter;
 
 /**
  * Provides drawing instructions for a GLSurfaceView object. This class
@@ -105,12 +115,31 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
+        // Allocates vertex, texture, and draw order buffer for TexturedSquare and all it's children.
+        TexturedSquare.allocateBuffers();
+        TexturedSquare.compileProgram(TexturedSquare.vertexShaderCode, TexturedSquare.fragmentShaderCode);
+
+        BoundingBox.compileProgram(BoundingBox.vertexShaderCode, BoundingBox.fragmentShaderCode);
+
+        // Compile all the filter programs
+        BrightnessFilter.compileProgram(BrightnessFilter.vertexShaderCode, BrightnessFilter.fragmentShaderCode);
+        ContrastFilter.compileProgram(ContrastFilter.vertexShaderCode, ContrastFilter.fragmentShaderCode);
+        GaussianBlurFilter.compileProgram(GaussianBlurFilter.vertexShaderCode, GaussianBlurFilter.fragmentShaderCode);
+        RotationFilter.compileProgram(RotationFilter.vertexShaderCode, RotationFilter.fragmentShaderCode);
+        SaturationFilter.compileProgram(SaturationFilter.vertexShaderCode, SaturationFilter.fragmentShaderCode);
+        SepiaFilter.compileProgram(SepiaFilter.vertexShaderCode, SepiaFilter.fragmentShaderCode);
+        NoiseFilter.compileProgram(NoiseFilter.vertexShaderCode, NoiseFilter.fragmentShaderCode);
+        InvertColorsFilter.compileProgram(InvertColorsFilter.vertexShaderCode, InvertColorsFilter.fragmentShaderCode);
+        ColorizeFilter.compileProgram(ColorizeFilter.vertexShaderCode, ColorizeFilter.fragmentShaderCode);
+        ThresholdBlurFilter.compileProgram(ThresholdBlurFilter.vertexShaderCode, ThresholdBlurFilter.fragmentShaderCode);
+        IdentityFilter.compileProgram(IdentityFilter.vertexShaderCode, IdentityFilter.fragmentShaderCode);
+
     }
 
     @Override
     public void onDrawFrame(GL10 unused) {
         for (TexturedSquare square : toBeCompiled) {
-            square.compile();
+            square.allocateAndCompile();
         }
         toBeCompiled.clear();
 
@@ -213,7 +242,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mOverlays = overlays;
     }
 
-    public void seFilters(List<IFilter> filters) {
+    public void setFilters(List<IFilter> filters) {
         filterRenderer.setFilters(filters);
     }
 

@@ -70,12 +70,9 @@ public class Overlay extends TexturedSquare{
     }
 
     @Override
-    public void compile() {
+    public void allocateAndCompile() {
         mTextureDataHandle = GLHelper.loadGLTexture(mBitmap);
         mBitmap.recycle();
-
-        allocateBuffers();
-        compileProgram();
     }
 
     public void showBoundingBox(boolean bool) {

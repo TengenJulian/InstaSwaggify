@@ -10,11 +10,12 @@ package zwaggerboyz.instaswaggify.filters;
  * This file contains the invert-colors-filter. It links to the required RenderScript-object.
  */
 
+import android.util.Log;
+
 import zwaggerboyz.instaswaggify.MyGLRenderer;
 
 public class InvertColorsFilter extends AbstractFilterClass {
-    private static final String vertexShaderCode =
-
+    public static final String vertexShaderCode =
             "attribute vec2 texCoordinate;" +
                     "attribute vec4 position;" +
                     "varying vec2 TexCoordinate;" +
@@ -26,31 +27,34 @@ public class InvertColorsFilter extends AbstractFilterClass {
                     "}";
 
 
-    private static final String fragmentShaderCode =
+    public static final String fragmentShaderCode =
             "precision mediump float;" +
 
             "uniform sampler2D u_Texture;" +
             "varying vec2 TexCoordinate;" +
 
             "void main() {" +
-            //"  gl_FragColor = vec4(0.5, 0.75, 0.5, 1.0);" +
 
             "  gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0) - texture2D(u_Texture, TexCoordinate) + vec4(0, 0, 0, 1.0);" +
-            //"  gl_FragColor = vec4(0.5, 0.5, 0.75, 0.5);" +
 
             "}";
 
     public InvertColorsFilter() {
         super();
-        super.vertexShaderCode = vertexShaderCode;
-        super.fragmentShaderCode = fragmentShaderCode;
-
         baseScaleX = MyGLRenderer.getWidth() / MyGLRenderer.getHeight();
         baseScaleY = 1;
 
         mID = FilterID.INVERT;
         mName = "Invert Colors";
         mNumValues = 0;
+        mProgram = ProgramStatic;
+        Log.i("mProgram", mProgram + "");
+    }
+
+    public static int ProgramStatic;
+
+    public static void compileProgram(String vertexShaderCode, String fragmentShaderCode) {
+        ProgramStatic = compileProgramHelper(vertexShaderCode, fragmentShaderCode);
     }
 
     //@Override

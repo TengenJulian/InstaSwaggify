@@ -265,7 +265,6 @@ public class FilterListAdapter extends BaseAdapter {
     public void addItem(IFilter filter) {
         mHistoryBuffer.updateBuffer(mItems, null);
         mItems.add(filter);
-        mListener.addFilterToCompileQueue(filter.getTextureSquare());
         mListener.filtersNotEmpty();
         updateList();
     }

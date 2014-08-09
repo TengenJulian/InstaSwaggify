@@ -5,8 +5,8 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <zwaggerboyz.instaswaggify.CanvasView
-        android:id="@+id/activity_main_canvasview"
+    <zwaggerboyz.instaswaggify.MyGLSurfaceView
+        android:id="@+id/activity_main_glsurfaceview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_toLeftOf="@+id/activity_main_viewPager"/>
@@ -24,4 +24,5 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_below="@+id/activity_main_tabs"/>
+
 </RelativeLayout>

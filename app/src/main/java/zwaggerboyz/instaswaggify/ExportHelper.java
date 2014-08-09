@@ -1,12 +1,14 @@
 package zwaggerboyz.instaswaggify;
 
-import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Looper;
 import android.widget.Toast;
 
 import java.io.File;
@@ -26,41 +28,54 @@ import java.util.Date;
  */
 
 public class ExportHelper {
+    private final Context mContext;
     private boolean mShare = true;
-    private Bitmap mBitmap = null;
-    private Activity mActivity;
-    private AsyncTask mAsyncTask = null;
+    private SavePictureTask mAsyncTask = null;
+    private Bitmap mBitmap;
 
-    CanvasView mCanvasView;
-    public void setCanvasView(CanvasView canvas){
-        mCanvasView = canvas;
+    public ExportHelper(Context context) {
+        mContext = context;
     }
 
-    public void exportPicture (boolean share, Activity activity) {
+    public void exportPicture (boolean share, Bitmap bitmap) {
         mShare = share;
-        mActivity = activity;
+        mBitmap = bitmap;
 
         if (mAsyncTask != null && mAsyncTask.getStatus() != AsyncTask.Status.FINISHED)
             return;
 
-        mBitmap = mCanvasView.getBitmap();
         mAsyncTask = new SavePictureTask();
-        mAsyncTask.execute(new String[0]);
+        mAsyncTask.execute();
     }
 
-    private class SavePictureTask extends AsyncTask<String, Void, Uri> {
+    private class SavePictureTask extends AsyncTask<Void, Void, Uri> {
+        ProgressDialog progressDialog;
+
         @Override
-        protected Uri doInBackground(String... integers) {
-            return savePicture();
+        protected Uri doInBackground(Void... params) {
+            int count = 1;
+
+            if (count == 0) {
+                return null;
+            }
+            else {
+                Uri result =  savePicture();
+                return result;
+            }
+
         }
 
         @Override
         protected void onPostExecute(Uri uri) {
+            if (progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+
             if (isCancelled())
                 return;
 
             if (uri == null)
-                Toast.makeText(mActivity, "Something went wrong, trying again ain't gonna fix it...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ExportHelper.this.mContext, "Something went wrong, trying again ain't gonna fix it...", Toast.LENGTH_SHORT).show();
 
             if (mShare) {
                 Intent share = new Intent(Intent.ACTION_SEND);
@@ -70,96 +85,112 @@ public class ExportHelper {
 
                 share.setType("image/png");
                 share.putExtra(Intent.EXTRA_STREAM, uri);
-                mActivity.startActivity(Intent.createChooser(share, "Share Image"));
+                mContext.startActivity(Intent.createChooser(share, "Share Image"));
             } else {
-                Toast.makeText(mActivity, "Picture successfully exported", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "Picture successfully exported", Toast.LENGTH_SHORT).show();
             }
         }
-    }
 
-    protected Uri savePicture() {
-        File folder, file;
-        FileOutputStream output;
-        String state = Environment.getExternalStorageState();
-        String extension = ".png";
-        Uri fileUri;
+        @Override
+        protected void onPreExecute() {
 
-        boolean externalIsAvailable = true;
+            if (progressDialog == null) {
+                progressDialog = new ProgressDialog(mContext);
+                progressDialog.setMessage("Synchronizing, please wait...");
+                progressDialog.show();
+                progressDialog.setCanceledOnTouchOutside(false);
+                progressDialog.setCancelable(false);
+            }
+        }
 
-        if(mBitmap == null)
-            return null;
+        protected Uri savePicture() {
+            File folder, file;
+            FileOutputStream output;
+            String state = Environment.getExternalStorageState();
+            String extension = ".png";
+            Uri fileUri;
 
-        if (!Environment.MEDIA_MOUNTED.equals(state))
-            externalIsAvailable = false;
+            boolean externalIsAvailable = true;
 
-        /* Try to open a file to export the picture. */
-        try {
-            /* filename is made with a timestamp */
-            SimpleDateFormat s = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss");
-            String date = s.format(new Date());
+            if(mBitmap == null)
+                return null;
 
-            if (!externalIsAvailable)
-                folder = new File("InstasSwaggify");
-            else
-                folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "InstaSwaggify");
+            if (!Environment.MEDIA_MOUNTED.equals(state))
+                externalIsAvailable = false;
 
-            if (!folder.exists()) {
-                if (!folder.mkdirs()) {
+            /* Try to open a file to export the picture. */
+            try {
+
+                /* filename is made with a timestamp */
+                SimpleDateFormat s = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss");
+                String date = s.format(new Date());
+
+                if (!externalIsAvailable)
+                    folder = new File("InstasSwaggify");
+                else
+                    folder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "InstaSwaggify");
+
+                if (!folder.exists()) {
+                    if (!folder.mkdirs()) {
+                        return null;
+                    }
+                }
+
+                folder = new File(folder, "Swaggified pictures");
+                if (!folder.exists()) {
+                    if (!folder.mkdirs()) {
+                        return null;
+                    }
+                }
+
+                file = new File(folder, date + extension);
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
+                else {
                     return null;
                 }
-            }
 
-            folder = new File(folder, "Swaggified pictures");
-            if (!folder.exists()) {
-                if (!folder.mkdirs()) {
-                    return null;
-                }
+                fileUri = Uri.fromFile(file);
+                output = new FileOutputStream(file);
             }
-
-            file = new File(folder, date + extension);
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            else {
+            catch (Exception e) {
+                e.printStackTrace();
                 return null;
             }
 
-            fileUri = Uri.fromFile(file);
-            output = new FileOutputStream(file);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-        try {
+            try {
             /* The media scanner has to scan the newly made image, for it to be visible
              * in the pictures folder.
              */
 
-            mBitmap.compress(Bitmap.CompressFormat.PNG, 100, output);
-            MediaScannerConnection.scanFile(mActivity,
-                    new String[]{file.toString()}, null,
-                    new MediaScannerConnection.OnScanCompletedListener() {
+                mBitmap.compress(Bitmap.CompressFormat.PNG, 100, output);
+                MediaScannerConnection.scanFile(mContext,
+                        new String[]{file.toString()}, null,
+                        new MediaScannerConnection.OnScanCompletedListener() {
 
-                        public void onScanCompleted(String path, Uri uri) {
+                            public void onScanCompleted(String path, Uri uri) {
+                            }
                         }
-                    }
-            );
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-        finally {
-            try {
-                output.flush();
-                output.close();
+                );
             }
-            catch (IOException e) {
+            catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
+            finally {
+                try {
+                    output.flush();
+                    output.close();
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            return fileUri;
         }
-        return fileUri;
+
     }
+
 }

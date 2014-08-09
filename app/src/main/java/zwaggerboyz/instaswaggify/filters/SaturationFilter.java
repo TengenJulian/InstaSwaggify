@@ -1,10 +1,5 @@
 package zwaggerboyz.instaswaggify.filters;
 
-import android.renderscript.Allocation;
-import android.renderscript.RenderScript;
-import android.renderscript.Script;
-
-import zwaggerboyz.instaswaggify.ScriptC_saturation;
 
 /*
  * APP:     InstaSwaggify
@@ -18,7 +13,6 @@ import zwaggerboyz.instaswaggify.ScriptC_saturation;
  */
 
 public class SaturationFilter extends AbstractFilterClass {
-    ScriptC_saturation mScript;
 
     public SaturationFilter() {
         mID = FilterID.SATURATION;
@@ -34,29 +28,7 @@ public class SaturationFilter extends AbstractFilterClass {
         };
     }
 
-    @Override
-    public void setRS(RenderScript rs) {
-        if (mRS != rs) {
-            mRS = rs;
-            mScript = new ScriptC_saturation(mRS);
-        }
-    }
-
-    @Override
-    public void setInput(Allocation allocation) { }
-
-    @Override
-    public void updateInternalValues() {
+/*    public void updateInternalValues() {
         mScript.set_saturationValue(normalizeValue(mValues[0], 0.f, 2.f));
-    }
-
-    @Override
-    public Script.KernelID getKernelId() {
-        return mScript.getKernelID_saturation();
-    }
-
-    @Override
-    public Script.FieldID getFieldId() {
-        return null;
-    }
+    }*/
 }

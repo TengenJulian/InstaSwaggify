@@ -53,9 +53,9 @@ public class MainActivity extends FragmentActivity
     private ShareActionProvider mShareActionProvider;
     private FilterListAdapter mFilterAdapter;
     private OverlayListAdapter mOverlayAdapter;
-    private CanvasView mCanvasView;
+    private MyGLSurfaceView mGLSurfaceView;
+    private MyGLRenderer mRenderer;
     private ViewPager mViewPager;
-    private RSFilterHelper mRSFilterHelper;
     private PresetsHelper mPresetsHelper;
     private DialogFragment mDialog;
     private Menu mMenu;
@@ -77,27 +77,21 @@ public class MainActivity extends FragmentActivity
 
         mHistoryBuffer = new HistoryBuffer(this);
 
-        mExportHelper = new ExportHelper();
-
         SlidingTabLayout slidingTabLayout = (SlidingTabLayout)findViewById(R.id.activity_main_tabs);
         mViewPager = (ViewPager) findViewById(R.id.activity_main_viewPager);
-        mCanvasView = (CanvasView) findViewById(R.id.activity_main_canvasview);
-
-        mExportHelper.setCanvasView(mCanvasView);
+        mGLSurfaceView = (MyGLSurfaceView) findViewById(R.id.activity_main_glsurfaceview);
+        mRenderer = mGLSurfaceView.getRenderer();
+        mRenderer.setActivity(this);
 
         mPresetsHelper = new PresetsHelper(this);
         mPresetsHelper.setPresetsHelperListener(this);
 
-        mRSFilterHelper = new RSFilterHelper();
-        mRSFilterHelper.createRS(this);
-        mRSFilterHelper.setCanvasView(mCanvasView);
-        mRSFilterHelper.setBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.data), true);
-        mRSFilterHelper.generateBitmap(new ArrayList<IFilter>(), this);
 
-        List<CanvasDraggableItem> overlays = new ArrayList<CanvasDraggableItem>();
+        List<Overlay> overlays = new ArrayList<Overlay>();
         mFilterAdapter = new FilterListAdapter(this, this, new ArrayList<IFilter>(), mHistoryBuffer);
-        mOverlayAdapter = new OverlayListAdapter(this, this, mCanvasView, overlays, mHistoryBuffer);
-        mCanvasView.setOverlays(overlays);
+        mOverlayAdapter = new OverlayListAdapter(this, this, mGLSurfaceView, overlays, mHistoryBuffer);
+        mGLSurfaceView.setOverlays(overlays);
+        //mCanvasView.setOverlays(overlays);
         FragmentStatePagerAdapter pagerAdapter = new ListViewPagerAdapter(
                 getSupportFragmentManager(),
                 mFilterAdapter,
@@ -116,6 +110,27 @@ public class MainActivity extends FragmentActivity
                 handleSendImage(intent);
             }
         }
+    }
+
+    private void setImage(Uri imageUri) {
+        if (imageUri == null)
+            return;
+
+        try {
+            /* The image is converted to a bitmap and send to the FilterHelper object. */
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+            mRenderer.setImage(bitmap);
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this,
+                    "Error occurred while opening picture",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        mOverlayAdapter.clearOverlays();
+        mFilterAdapter.clearFilters();
     }
 
     @Override
@@ -216,12 +231,14 @@ public class MainActivity extends FragmentActivity
             }
 
             case R.id.action_save_picture: {
-                mExportHelper.exportPicture(false, this);
+                mRenderer.savePicture(false);
+                mGLSurfaceView.requestRender();
                 return true;
             }
 
             case R.id.action_share: {
-                mExportHelper.exportPicture(true, this);
+                mRenderer.savePicture(true);
+                mGLSurfaceView.requestRender();
                 return true;
             }
 
@@ -241,19 +258,7 @@ public class MainActivity extends FragmentActivity
         /* Get image taken by the camera. */
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                try {
-                    /* The image is converted to a bitmap and send to the FilterHelper object. */
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), mImageUri);
-
-                    /* Set it on canvas already so we can force recalculateSize */
-                    mCanvasView.setBitmap(bitmap, true);
-                    mRSFilterHelper.setBitmap(bitmap, true);
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-                mOverlayAdapter.clearOverlays();
-                mFilterAdapter.clearFilters();
+                setImage(mImageUri);
             }
             else if (resultCode != RESULT_CANCELED) {
                 Toast.makeText(this, "Could not capture image", Toast.LENGTH_SHORT).show();
@@ -264,19 +269,7 @@ public class MainActivity extends FragmentActivity
         else if (requestCode == SELECT_IMAGE_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 mImageUri = data.getData();
-                try {
-                    /* The image is converted to a bitmap and send to the FilterHelper object. */
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), mImageUri);
-
-                    /* Set it on canvas already so we can force recalculateSize */
-                    mCanvasView.setBitmap(bitmap, true);
-                    mRSFilterHelper.setBitmap(bitmap, true);
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-                mFilterAdapter.clearFilters();
-                mOverlayAdapter.clearOverlays();
+                setImage(mImageUri);
             }
             else if (resultCode != RESULT_CANCELED) {
                 Toast.makeText(this, "Could not select image", Toast.LENGTH_SHORT).show();
@@ -291,23 +284,7 @@ public class MainActivity extends FragmentActivity
 
     void handleSendImage(Intent intent) {
         Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-
-        if (imageUri == null)
-            return;
-
-        try {
-            /* The image is converted to a bitmap and send to the FilterHelper object. */
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-
-            mRSFilterHelper.setBitmap(bitmap, true);
-            updateImage(mFilterAdapter.getItems());
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(this,
-                    "Error occurred while opening picture",
-                    Toast.LENGTH_SHORT).show();
-        }
+        setImage(imageUri);
     }
 
     @Override
@@ -317,7 +294,13 @@ public class MainActivity extends FragmentActivity
 
     @Override
     public void updateImage(List<IFilter> filters, boolean forceUpdate) {
-        mRSFilterHelper.generateBitmap(filters, this, forceUpdate);
+        mGLSurfaceView.requestRender();
+        mRenderer.seFilters(filters);
+    }
+
+    @Override
+    public void addFilterToCompileQueue(TexturedSquare filter) {
+        mRenderer.addToCompileQueue(filter);
     }
 
     @Override
@@ -351,10 +334,7 @@ public class MainActivity extends FragmentActivity
         mDialog.dismiss();
         int resourceId = getResources().getIdentifier(resourceName.toLowerCase().replaceAll(" ", ""), "drawable", getPackageName());
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), resourceId);
-        CanvasDraggableItem overlay = new CanvasDraggableItem(bitmap,
-                mCanvasView.getWidth() / 2,
-                mCanvasView.getHeight() / 2,
-                resourceName);
+        Overlay overlay = new Overlay(bitmap, resourceName);
         mOverlayAdapter.addItem(overlay);
     }
 

@@ -1,11 +1,6 @@
 package zwaggerboyz.instaswaggify.filters;
 
 
-import android.renderscript.Allocation;
-import android.renderscript.RenderScript;
-import android.renderscript.Script;
-import android.util.Log;
-
 /*
  * APP:     InstaSwaggify
  * DATE:    June 2014
@@ -17,7 +12,9 @@ import android.util.Log;
  * number of variables with getter- and setter-functions.
  */
 
-public abstract class AbstractFilterClass implements IFilter, Cloneable {
+import zwaggerboyz.instaswaggify.TexturedSquare;
+
+public abstract class AbstractFilterClass extends TexturedSquare implements IFilter {
 
     public enum FilterID {
         BRIGHTNESS,
@@ -29,7 +26,8 @@ public abstract class AbstractFilterClass implements IFilter, Cloneable {
         NOISE,
         INVERT,
         COLORIZE,
-        THRESHOLD
+        THRESHOLD,
+        IDENTITY
     }
 
     protected FilterID mID;
@@ -39,7 +37,6 @@ public abstract class AbstractFilterClass implements IFilter, Cloneable {
     protected int mNumValues;
     protected int imageHeight;
     protected int imageWidth;
-    protected RenderScript mRS;
 
     public String getName() {
         return mName;
@@ -71,11 +68,6 @@ public abstract class AbstractFilterClass implements IFilter, Cloneable {
         }
     }
 
-    public void setDimensions(int imageHeight, int imageWidth) {
-        this.imageHeight = imageHeight;
-        this.imageWidth = imageWidth;
-    }
-
     /* set input value to the according value between the min and max value */
     public float normalizeValue(int value, float min, float max) {
         return (float) ((max - min) * (value / 100.0) + min);
@@ -90,24 +82,32 @@ public abstract class AbstractFilterClass implements IFilter, Cloneable {
         }
     }
 
+    @Override
+    public void draw(float[] mvpMatrix, int fboTexture) {
+        setTextureDataHandle(fboTexture);
+        super.draw(mvpMatrix);
+    }
+
+    @Override
+    public void compile() {
+        allocateBuffers();
+        compileProgram();
+    }
+
+    @Override
     public IFilter clone() {
-        try {
-            IFilter clone = (IFilter) super.clone();
-            clone.setArray(new int[getNumValues()]);
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return null;
+    }
+
+    public void setTextureDataHandle(int texture) {
+        super.setTextureDataHandle(texture);
     }
 
     public int getNumValues() {
         return mNumValues;
     }
 
-    public abstract void setRS(RenderScript rs);
-    public abstract void setInput(Allocation allocation);
-    public abstract void updateInternalValues();
-    public abstract Script.KernelID getKernelId();
-    public abstract Script.FieldID getFieldId();
+    public TexturedSquare getTextureSquare() {
+        return (TexturedSquare) this;
+    }
 }

@@ -13,6 +13,7 @@ import java.util.List;
 
 import zwaggerboyz.instaswaggify.HistoryBuffer;
 import zwaggerboyz.instaswaggify.R;
+import zwaggerboyz.instaswaggify.TexturedSquare;
 import zwaggerboyz.instaswaggify.filters.IFilter;
 
 /*
@@ -264,6 +265,7 @@ public class FilterListAdapter extends BaseAdapter {
     public void addItem(IFilter filter) {
         mHistoryBuffer.updateBuffer(mItems, null);
         mItems.add(filter);
+        mListener.addFilterToCompileQueue(filter.getTextureSquare());
         mListener.filtersNotEmpty();
         updateList();
     }
@@ -286,6 +288,7 @@ public class FilterListAdapter extends BaseAdapter {
         public void updateImage(List<IFilter> filters, boolean forceUpdate);
         public void filtersEmpty();
         public void filtersNotEmpty();
+        public void addFilterToCompileQueue(TexturedSquare filter);
     }
 }
 

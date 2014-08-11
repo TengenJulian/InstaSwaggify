@@ -32,11 +32,11 @@ import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
 import zwaggerboyz.instaswaggify.filters.BrightnessFilter;
 import zwaggerboyz.instaswaggify.filters.ColorizeFilter;
 import zwaggerboyz.instaswaggify.filters.ContrastFilter;
 import zwaggerboyz.instaswaggify.filters.GaussianBlurFilter;
-import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
 import zwaggerboyz.instaswaggify.filters.IdentityFilter;
 import zwaggerboyz.instaswaggify.filters.InvertColorsFilter;
 import zwaggerboyz.instaswaggify.filters.NoiseFilter;
@@ -49,9 +49,9 @@ import zwaggerboyz.instaswaggify.filters.ThresholdBlurFilter;
  * Provides drawing instructions for a GLSurfaceView object. This class
  * must override the OpenGL ES drawing lifecycle methods:
  * <ul>
- *   <li>{@link android.opengl.GLSurfaceView.Renderer#onSurfaceCreated}</li>
- *   <li>{@link android.opengl.GLSurfaceView.Renderer#onDrawFrame}</li>
- *   <li>{@link android.opengl.GLSurfaceView.Renderer#onSurfaceChanged}</li>
+ * <li>{@link android.opengl.GLSurfaceView.Renderer#onSurfaceCreated}</li>
+ * <li>{@link android.opengl.GLSurfaceView.Renderer#onDrawFrame}</li>
+ * <li>{@link android.opengl.GLSurfaceView.Renderer#onSurfaceChanged}</li>
  * </ul>
  */
 public class MyGLRenderer implements GLSurfaceView.Renderer {
@@ -116,6 +116,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private static final int[] scratch = new int[1];
     private static float Width;
     private static float Height;
+
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
@@ -150,8 +151,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             TEXTURE_HEIGHT_MAP[textureId] = height = bitmap.getHeight();
             bitmap.recycle();
 
-        }
-        else {
+        } else {
             width = TEXTURE_WIDTH_MAP[textureId];
             height = TEXTURE_HEIGHT_MAP[textureId];
         }
@@ -174,7 +174,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         this.height = height;
     }
 
-    public float getRatio(){
+    public float getRatio() {
         return ratio;
     }
 
@@ -190,9 +190,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // No depth testing
         //GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 
-        GLES20.glEnable( GLES20.GL_DEPTH_TEST );
-        GLES20.glDepthFunc( GLES20.GL_LEQUAL );
-        GLES20.glDepthMask( true );
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+        GLES20.glDepthMask(true);
 
         // Enable blending
         GLES20.glEnable(GLES20.GL_BLEND);
@@ -218,26 +218,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         IdentityFilter.compileProgram(IdentityFilter.vertexShaderCode, IdentityFilter.fragmentShaderCode);
 
         clearCache();
-    }
-
-    @Override
-    public void onDrawFrame(GL10 unused) {
-        for (Overlay overlay : toBeCompiled) {
-            loadCachedTextureResource(overlay, mContext);
-        }
-        toBeCompiled.clear();
-
-        filterRenderer.draw(mMVPMatrix);
-
-        // Draw overlays
-        for (int i = mOverlays.size() - 1; 0 <= i; i--) {
-            mOverlays.get(i).draw(mMVPMatrix);
-        }
-
-        if (savePicture) {
-            executeSavePicture();
-        }
-
     }
 
     @Override
@@ -269,6 +249,26 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.data);
             filterRenderer = new FilterRenderer(width, height, bitmap);
         }
+    }
+
+    @Override
+    public void onDrawFrame(GL10 unused) {
+        for (Overlay overlay : toBeCompiled) {
+            loadCachedTextureResource(overlay, mContext);
+        }
+        toBeCompiled.clear();
+
+        filterRenderer.draw(mMVPMatrix);
+
+        // Draw overlays
+        for (int i = mOverlays.size() - 1; 0 <= i; i--) {
+            mOverlays.get(i).draw(mMVPMatrix);
+        }
+
+        if (savePicture) {
+            executeSavePicture();
+        }
+
     }
 
     public Overlay getSelection(float x, float y) {
@@ -318,7 +318,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
 
         final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        bitmap.setPixels(pixelsBuffer, screenshotSize-width, -width, 0, 0, width, height);
+        bitmap.setPixels(pixelsBuffer, screenshotSize - width, -width, 0, 0, width, height);
         savePicture = false;
 
         mContext.runOnUiThread(new Runnable() {

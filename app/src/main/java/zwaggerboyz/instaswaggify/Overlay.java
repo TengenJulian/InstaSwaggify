@@ -31,8 +31,6 @@ public class Overlay extends TexturedSquare{
     private int mTextureId;
     private String mName;
     private boolean flipped;
-    private onOverlayChangeListener mListener;
-    private Bitmap mBitmap;
 
     public static void printSquare4(String name, float matrix[]) {
         for (int i = 0; i < 16; i += 4){
@@ -67,6 +65,7 @@ public class Overlay extends TexturedSquare{
             baseScaleX = 0.45f * width / height;
             baseScaleY = 0.45f;
         }
+
     }
 
     public void showBoundingBox(boolean bool) {
@@ -101,14 +100,6 @@ public class Overlay extends TexturedSquare{
 
     public String getName() {
         return mName;
-    }
-
-    public void setOnOverlayChangeListener(onOverlayChangeListener listener) {
-        mListener = listener;
-    }
-
-    public interface onOverlayChangeListener {
-        public void updateBuffer();
     }
 
     public void setValues(float values[]) {

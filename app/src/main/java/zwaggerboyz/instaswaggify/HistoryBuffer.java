@@ -210,4 +210,5 @@ public class HistoryBuffer {
             return stack.size();
         }
     }
+
 }

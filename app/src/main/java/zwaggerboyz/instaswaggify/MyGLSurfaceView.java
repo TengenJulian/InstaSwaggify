@@ -177,7 +177,7 @@ public class MyGLSurfaceView extends GLSurfaceView implements RotationGestureDet
         mListener = listener;
     }
 
-    public void addToCompileQueue(TexturedSquare overlay) {
+    public void addToCompileQueue(Overlay overlay) {
         mRenderer.addToCompileQueue(overlay);
     }
 

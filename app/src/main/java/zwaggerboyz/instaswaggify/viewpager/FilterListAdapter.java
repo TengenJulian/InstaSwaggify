@@ -322,7 +322,6 @@ public class FilterListAdapter extends BaseAdapter {
         public void updateImage(List<AbstractFilterClass> filters, boolean forceUpdate);
         public void filtersEmpty();
         public void filtersNotEmpty();
-        public void addFilterToCompileQueue(TexturedSquare filter);
     }
 }
 

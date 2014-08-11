@@ -300,11 +300,6 @@ public class MainActivity extends FragmentActivity
     }
 
     @Override
-    public void addFilterToCompileQueue(TexturedSquare filter) {
-        mRenderer.addToCompileQueue(filter);
-    }
-
-    @Override
     public void filtersEmpty() {
         mMenu.findItem(R.id.action_preset_save).setEnabled(false);
         if (mViewPager.getCurrentItem() == ListViewPagerAdapter.PAGE_FILTERS)
@@ -331,11 +326,8 @@ public class MainActivity extends FragmentActivity
     }
 
     @Override
-    public void OnAddOverlayListener(String resourceName) {
+    public void OnAddOverlayListener(Overlay overlay) {
         mDialog.dismiss();
-        int resourceId = getResources().getIdentifier(resourceName.toLowerCase().replaceAll(" ", ""), "drawable", getPackageName());
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), resourceId);
-        Overlay overlay = new Overlay(bitmap, resourceName);
         mOverlayAdapter.addItem(overlay);
     }
 

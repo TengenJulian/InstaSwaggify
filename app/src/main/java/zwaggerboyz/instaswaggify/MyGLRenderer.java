@@ -15,6 +15,7 @@
  */
 package zwaggerboyz.instaswaggify;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
@@ -25,6 +26,7 @@ import android.util.Log;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -54,24 +56,78 @@ import zwaggerboyz.instaswaggify.filters.ThresholdBlurFilter;
  */
 public class MyGLRenderer implements GLSurfaceView.Renderer {
 
-    private List<Overlay> mOverlays;
-    private List<TexturedSquare> toBeCompiled = new ArrayList<TexturedSquare>();
-    private FilterRenderer filterRenderer;
+    public static final String[] RESOURCE_NAME_MAP =
+            {
+                    "InstaAchievement",
+                    "InstaBeard",
+                    "InstaBeard2",
+                    "InstaBling",
+                    "InstaBling2",
+                    "InstaCap",
+                    "InstaCrown",
+                    "InstaDealWithIt",
+                    "InstaDew",
+                    "InstaDoge",
+                    "InstaDoritos",
+                    "InstaFedora",
+                    "InstaHitmarker",
+                    "InstaJoint",
+                    "InstaMLG",
+                    "InstaMoney",
+                    "InstaMoustache",
+                    "InstaMoustache2",
+                    "InstaNoScope",
+                    "InstaNova",
+                    "InstaPlus100",
+                    "InstaSnoop",
+                    "InstaSwag",
+                    "InstaWeed",
+            };
+    static final int[] RESOURCE_MAP = {
+            R.drawable.instaachievement,
+            R.drawable.instabeard,
+            R.drawable.instabeard2,
+            R.drawable.instabling,
+            R.drawable.instabling2,
+            R.drawable.instacap,
+            R.drawable.instacrown,
+            R.drawable.instadealwithit,
+            R.drawable.instadew,
+            R.drawable.instadoge,
+            R.drawable.instadoritos,
+            R.drawable.instafedora,
+            R.drawable.instahitmarker,
+            R.drawable.instajoint,
+            R.drawable.instamlg,
+            R.drawable.instamoney,
+            R.drawable.instamoustache,
+            R.drawable.instamoustache2,
+            R.drawable.instanoscope,
+            R.drawable.instanova,
+            R.drawable.instaplus100,
+            R.drawable.instasnoop,
+            R.drawable.instaswag,
+            R.drawable.instaweed
+    };
+    private static final int[] TEXTURE_DATA_HANDLES = new int[RESOURCE_MAP.length];
+    private static final int[] TEXTURE_WIDTH_MAP = new int[RESOURCE_MAP.length];
+    private static final int[] TEXTURE_HEIGHT_MAP = new int[RESOURCE_MAP.length];
 
-    private ExportHelper mExportHelper;
-    private boolean mShare;
-
-    private MainActivity mContext;
-    private float ratio;
-    private TexturedSquare mSquare;
-    private int height, width;
-
+    private static final int[] scratch = new int[1];
+    private static float Width;
+    private static float Height;
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
-    private static float Width;
-    private static float Height;
+    private List<Overlay> mOverlays;
+    private List<Overlay> toBeCompiled = new ArrayList<Overlay>();
+    private FilterRenderer filterRenderer;
+    private ExportHelper mExportHelper;
+    private boolean mShare;
+    private MainActivity mContext;
+    private float ratio;
+    private int height, width;
     private boolean savePicture;
 
     public static float getWidth() {
@@ -80,6 +136,33 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public static float getHeight() {
         return Height;
+    }
+
+    public static void loadCachedTextureResource(Overlay overlay, Context context) {
+        int textureId = overlay.getTextureId();
+        int textureDataHandle = TEXTURE_DATA_HANDLES[textureId];
+        int width, height;
+
+        if (textureDataHandle == -1) {
+            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), RESOURCE_MAP[textureId]);
+            textureDataHandle = GLHelper.loadGLTexture(bitmap);
+            TEXTURE_WIDTH_MAP[textureId] = width = bitmap.getWidth();
+            TEXTURE_HEIGHT_MAP[textureId] = height = bitmap.getHeight();
+            bitmap.recycle();
+
+        }
+        else {
+            width = TEXTURE_WIDTH_MAP[textureId];
+            height = TEXTURE_HEIGHT_MAP[textureId];
+        }
+
+        overlay.calcBaseScale(width, height);
+        overlay.setTextureDataHandle(textureDataHandle);
+
+    }
+
+    public static void clearCache() {
+        Arrays.fill(TEXTURE_DATA_HANDLES, -1);
     }
 
     public void setActivity(MainActivity activity) {
@@ -134,12 +217,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         ThresholdBlurFilter.compileProgram(ThresholdBlurFilter.vertexShaderCode, ThresholdBlurFilter.fragmentShaderCode);
         IdentityFilter.compileProgram(IdentityFilter.vertexShaderCode, IdentityFilter.fragmentShaderCode);
 
+        clearCache();
     }
 
     @Override
     public void onDrawFrame(GL10 unused) {
-        for (TexturedSquare square : toBeCompiled) {
-            square.allocateAndCompile();
+        for (Overlay overlay : toBeCompiled) {
+            loadCachedTextureResource(overlay, mContext);
         }
         toBeCompiled.clear();
 
@@ -258,8 +342,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         filterRenderer.setFilters(filters);
     }
 
-    public void addToCompileQueue(TexturedSquare square) {
-        toBeCompiled.add(square);
+    public void addToCompileQueue(Overlay overlay) {
+        toBeCompiled.add(overlay);
     }
 
 }

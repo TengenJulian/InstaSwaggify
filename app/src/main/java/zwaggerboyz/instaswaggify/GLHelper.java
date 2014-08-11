@@ -10,6 +10,7 @@ import android.util.Log;
  */
 public class GLHelper {
     private static final String TAG = "MyGLRenderer";
+    private static final int scratch[] = new int[1];
 
     /**
      * Utility method for compiling a OpenGL shader.
@@ -51,9 +52,9 @@ public class GLHelper {
     }
 
     public static int loadGLTexture(Bitmap bitmap) {
-        int scratch[] = new int[1];
         int textureDataHandle;
         // generate one texture pointer
+
         GLES20.glGenTextures(1, scratch, 0);
         textureDataHandle = scratch[0];
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureDataHandle);
@@ -93,4 +94,5 @@ public class GLHelper {
             throw new RuntimeException(glOperation + ": glError " + error);
         }
     }
+
 }

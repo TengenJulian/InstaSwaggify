@@ -24,10 +24,11 @@ import android.util.Log;
  * A two-dimensional square for use as a drawn object in OpenGL ES 2.0.
  */
 public class Overlay extends TexturedSquare{
-    private final float width;
-    private final float height;
+    private float width;
+    private float height;
     private Boolean boundingBoxEnabled = false;
     private BoundingBox bbox;
+    private int mTextureId;
     private String mName;
     private boolean flipped;
     private onOverlayChangeListener mListener;
@@ -48,31 +49,24 @@ public class Overlay extends TexturedSquare{
     /**
      * Sets up the drawing object data for use in an OpenGL ES mContext.
      */
-    public Overlay(Bitmap bitmap, String name) {
+    public Overlay(int textureId, String name) {
         super();
-
-        width = bitmap.getWidth();
-        height = bitmap.getHeight();
-
-        baseScaleY = baseScaleX = 0.45f;
-
-        if (width > height) {
-            scaleX = 1;
-            scaleY = height / width;
-
-        }
-        else {
-            scaleX = width / height;
-            scaleY = 1;
-        }
-        mBitmap = bitmap;
+        mTextureId = textureId;
         mName = name;
     }
 
-    @Override
-    public void allocateAndCompile() {
-        mTextureDataHandle = GLHelper.loadGLTexture(mBitmap);
-        mBitmap.recycle();
+    public void calcBaseScale(float width, float height) {
+        this.width = width;
+        this.height = height;
+        if (width > height) {
+            baseScaleX = 0.45f;
+            baseScaleY = 0.45f * height / width;
+
+        }
+        else {
+            baseScaleX = 0.45f * width / height;
+            baseScaleY = 0.45f;
+        }
     }
 
     public void showBoundingBox(boolean bool) {
@@ -91,7 +85,7 @@ public class Overlay extends TexturedSquare{
      * this shape.
      */
     public void draw(float[] mvpMatrix) {
-       if (boundingBoxEnabled) {
+        if (boundingBoxEnabled) {
            bbox.setScaleFactor(scaleX, scaleY);
            bbox.setCenter(centerX, centerY);
            bbox.rotate(angle);
@@ -107,18 +101,6 @@ public class Overlay extends TexturedSquare{
 
     public String getName() {
         return mName;
-    }
-
-    @Override
-    public Overlay clone() {
-        try {
-            Overlay temp = (Overlay) super.clone();
-            return temp;
-        } catch (CloneNotSupportedException e) {
-            //e.printStackTrace();
-        }
-
-        return null;
     }
 
     public void setOnOverlayChangeListener(onOverlayChangeListener listener) {
@@ -147,12 +129,7 @@ public class Overlay extends TexturedSquare{
         return values;
     }
 
-    @Override
-    public void close() {
-/*        Log.i("closing overlay", "");
-        int temp[] = {mTextureDataHandle};
-        GLES20.glDeleteTextures(1, temp, 0);
-        super.close();*/
+    public int getTextureId() {
+        return mTextureId;
     }
-
 }

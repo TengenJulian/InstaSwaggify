@@ -9,6 +9,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import zwaggerboyz.instaswaggify.MyGLRenderer;
+import zwaggerboyz.instaswaggify.Overlay;
 import zwaggerboyz.instaswaggify.R;
 
 /**
@@ -22,33 +25,8 @@ import zwaggerboyz.instaswaggify.R;
  */
 
 public class OverlayDialog extends DialogFragment {
-    private static final String[] mAllOverlays =
-            {
-                    "InstaAchievement",
-                    "InstaBeard",
-                    "InstaBeard2",
-                    "InstaBling",
-                    "InstaBling2",
-                    "InstaCap",
-                    "InstaCrown",
-                    "InstaDealWithIt",
-                    "InstaDew",
-                    "InstaDoge",
-                    "InstaDoritos",
-                    "InstaFedora",
-                    "InstaHitmarker",
-                    "InstaJoint",
-                    "InstaMLG",
-                    "InstaMoney",
-                    "InstaMoustache",
-                    "InstaMoustache2",
-                    "InstaNoScope",
-                    "InstaNova",
-                    "InstaPlus100",
-                    "InstaSnoop",
-                    "InstaSwag",
-                    "InstaWeed",
-            };
+    private static final String[] mAllOverlays = MyGLRenderer.RESOURCE_NAME_MAP;
+
     private OnAddOverlayListener mListener = null;
     ArrayAdapter<String> mAdapter;
 
@@ -71,7 +49,7 @@ public class OverlayDialog extends DialogFragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int listId, long l) {
                 if (mListener != null) {
-                    mListener.OnAddOverlayListener(mAllOverlays[listId]);
+                    mListener.OnAddOverlayListener(new Overlay(listId, mAllOverlays[listId]));
                 }
             }
         });
@@ -82,6 +60,6 @@ public class OverlayDialog extends DialogFragment {
         mListener = listener;
     }
     public interface OnAddOverlayListener {
-        public void OnAddOverlayListener(String resourceName);
+        public void OnAddOverlayListener(Overlay overlay);
     }
 }

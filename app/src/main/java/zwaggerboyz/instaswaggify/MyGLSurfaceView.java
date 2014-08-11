@@ -32,11 +32,14 @@ import java.util.List;
  * interacting with drawn objects.
  */
 public class MyGLSurfaceView extends GLSurfaceView implements RotationGestureDetector.OnRotationGestureListener{
-    public RotationGestureDetector mRotationGesture;
-    public ScaleGestureDetector mScaleDetector;
+    private RotationGestureDetector mRotationGesture;
+    private ScaleGestureDetector mScaleDetector;
+    private HistoryBuffer historyBuffer;
+
     private MyGLRenderer mRenderer;
     private Context mContext;
     private Overlay mSelected;
+    private int mSelectedIndex;
 
     private float oldX;
     private float oldY;
@@ -98,9 +101,11 @@ public class MyGLSurfaceView extends GLSurfaceView implements RotationGestureDet
                 oldX = newX;
                 oldY = newY;
 
+                mSelectedIndex = mRenderer.getSelectionIndex(-newX, newY);
                 mSelected = mRenderer.getSelection(-newX, newY);
                 if (mSelected != null) {
                     Log.i("Action Down", "selection found");
+                    historyBuffer.recordValueChange(new DataContainer(mSelected.getValues()), mSelectedIndex);
                 }
 
                 return true;
@@ -162,6 +167,10 @@ public class MyGLSurfaceView extends GLSurfaceView implements RotationGestureDet
 
     public void setOverlays(List<Overlay> overlays) {
         mRenderer.setOverlays(overlays);
+    }
+
+    public void setHistoryBuffer(HistoryBuffer historyBuffer) {
+        this.historyBuffer = historyBuffer;
     }
 
     public void setOnOverlayChangeListener(onOverlayChangeListener listener) {

@@ -12,6 +12,10 @@ package zwaggerboyz.instaswaggify.filters;
  * number of variables with getter- and setter-functions.
  */
 
+import android.util.Log;
+import java.util.Arrays;
+
+
 import zwaggerboyz.instaswaggify.TexturedSquare;
 
 public abstract class AbstractFilterClass extends TexturedSquare {
@@ -75,11 +79,17 @@ public abstract class AbstractFilterClass extends TexturedSquare {
 
     public void setArray(int[] array) {
         if (array.length > 0) {
-            System.arraycopy(mValues, 0, array, 0, mNumValues);
-            mValues = array;
+            System.arraycopy(array, 0, mValues, 0, mNumValues);
         } else {
-            mValues = new int[0];
+            mValues = new int[mNumValues];
         }
+    }
+
+    public int[] getArray() {
+        int output[] = new int[mNumValues];
+        System.arraycopy(mValues, 0, output, 0, mNumValues);
+        Log.i("filter values", Arrays.toString(output));
+        return output;
     }
 
     public void draw(float[] mvpMatrix, int fboTexture) {

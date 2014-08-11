@@ -242,16 +242,13 @@ public class TexturedSquare {
         // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
         GLES20.glUniform1i(mTextureUniformHandle, 0);
 
-        specifyExtraVariableHandles();
+        specifyExtraVariables();
     }
 
-    protected void specifyExtraVariableHandles() {
+    protected void specifyExtraVariables() {
 
     }
 
-    protected void bindExtraVariableHandles() {
-
-    }
 
     /**
      * Encapsulates the OpenGL ES instructions for drawing this shape.
@@ -267,7 +264,6 @@ public class TexturedSquare {
 
         GLES20.glUseProgram(mProgram);
         specifyVariableHandles();
-        bindExtraVariableHandles();
 
 
         // Apply the projection and view transformation

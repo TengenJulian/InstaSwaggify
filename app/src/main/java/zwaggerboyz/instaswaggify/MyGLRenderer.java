@@ -199,6 +199,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         return null;
     }
 
+    public int getSelectionIndex(float x, float y) {
+
+        for (int i = 0; i < mOverlays.size(); i++) {
+            Overlay overlay = mOverlays.get(i);
+
+            if (overlay.contains(x, y, mMVPMatrix))
+                return i;
+        }
+
+        return -1;
+    }
+
     public void savePicture(boolean share) {
         savePicture = true;
         mShare = share;

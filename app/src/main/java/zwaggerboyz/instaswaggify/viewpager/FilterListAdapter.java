@@ -1,6 +1,7 @@
 package zwaggerboyz.instaswaggify.viewpager;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,9 +9,12 @@ import android.widget.BaseAdapter;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import zwaggerboyz.instaswaggify.DataContainer;
 import zwaggerboyz.instaswaggify.HistoryBuffer;
+import zwaggerboyz.instaswaggify.Overlay;
 import zwaggerboyz.instaswaggify.R;
 import zwaggerboyz.instaswaggify.TexturedSquare;
 import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
@@ -30,6 +34,7 @@ public class FilterListAdapter extends BaseAdapter {
     private List<AbstractFilterClass> mItems;
     private FilterListInterface mListener;
     private HistoryBuffer mHistoryBuffer;
+    private boolean historyEnabled = true;
 
     private class ViewHolder {
         public TextView titleTextView, label1TextView, label2TextView, label3TextView;
@@ -53,22 +58,6 @@ public class FilterListAdapter extends BaseAdapter {
         return mItems.get(position);
     }
 
-    public void setItems(List<AbstractFilterClass> items) {
-        setItems(items, true);
-    }
-
-    public void setItems(List<AbstractFilterClass> items, boolean isUndoable) {
-        if (isUndoable)
-            mHistoryBuffer.updateBuffer(mItems, null);
-
-        mItems = items;
-        notifyDataSetChanged();
-        mListener.updateImage(mItems);
-        if (mItems.size() > 0)
-            mListener.filtersNotEmpty();
-        else
-            mListener.filtersEmpty();
-    }
 
     @Override
     public long getItemId(int position) {
@@ -170,7 +159,8 @@ public class FilterListAdapter extends BaseAdapter {
 
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar) {
-                    mHistoryBuffer.updateBuffer(mItems, null);
+                    //mHistoryBuffer.updateBuffer(mItems, null);
+                    mHistoryBuffer.recordValueChange(new DataContainer(item.getArray()), position);
                 }
 
                 @Override
@@ -193,7 +183,8 @@ public class FilterListAdapter extends BaseAdapter {
 
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar) {
-                    mHistoryBuffer.updateBuffer(mItems, null);
+                    //mHistoryBuffer.updateBuffer(mItems, null);
+                    mHistoryBuffer.recordValueChange(new DataContainer(item.getArray()), position);
                 }
 
                 @Override
@@ -215,7 +206,9 @@ public class FilterListAdapter extends BaseAdapter {
                 }
 
                 @Override
-                public void onStartTrackingTouch(SeekBar seekBar) { }
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                    mHistoryBuffer.recordValueChange(new DataContainer(item.getArray()), position);
+                }
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
@@ -237,11 +230,28 @@ public class FilterListAdapter extends BaseAdapter {
         return mItems;
     }
 
+    public void setItems(List<AbstractFilterClass> items) {
+        if (historyEnabled) {
+            mHistoryBuffer.recordSet(new DataContainer(new ArrayList(mItems), DataContainer.DataType.FILTER_DATA));
+        }
+
+        mItems = items;
+        notifyDataSetChanged();
+        mListener.updateImage(mItems);
+
+        if (mItems.size() == 0)
+            mListener.filtersEmpty();
+        else
+            mListener.filtersNotEmpty();
+    }
+
     /* Removes item at index from filter list */
     public void remove(int index) {
-        mHistoryBuffer.updateBuffer(mItems, null);
+        AbstractFilterClass filter = mItems.remove(index);
 
-        mItems.remove(mItems.get(index));
+        if (historyEnabled) {
+            mHistoryBuffer.recordRemove(new DataContainer(filter), index);
+        }
 
         mListener.updateImage(mItems);
         if (mItems.size() == 0)
@@ -250,21 +260,50 @@ public class FilterListAdapter extends BaseAdapter {
     }
 
     public void reorder(int from, int to) {
+        Log.i("reorder was called", " yes");
         if (from != to) {
-            mHistoryBuffer.updateBuffer(mItems, null);
+            if (historyEnabled) {
+                mHistoryBuffer.recordReorder(from, to, DataContainer.DataType.FILTER_DATA);
+            }
 
             AbstractFilterClass element = mItems.remove(from);
             mItems.add(to, element);
 
-            notifyDataSetChanged();
-            mListener.updateImage(mItems);
+            updateList();
         }
     }
 
     public void addItem(AbstractFilterClass filter) {
-        mHistoryBuffer.updateBuffer(mItems, null);
+        if (historyEnabled) {
+            mHistoryBuffer.recordAdd(DataContainer.DataType.FILTER_DATA);
+        }
+
         mItems.add(filter);
         mListener.filtersNotEmpty();
+        updateList();
+    }
+
+    public void insertItem(AbstractFilterClass filter, int index) {
+        mItems.add(index, filter);
+        mListener.filtersNotEmpty();
+        updateList();
+    }
+
+    public void changeValue(int index, int[] values) {
+        AbstractFilterClass filter = mItems.get(index);
+        filter.setArray(values);
+        mListener.filtersNotEmpty();
+        updateList();
+    }
+
+    public void clearFilters() {
+        if (historyEnabled) {
+            mHistoryBuffer.recordClear(new DataContainer(new ArrayList(mItems), DataContainer.DataType.FILTER_DATA));
+        }
+
+        mItems.clear();
+        mListener.updateImage(mItems);
+        mListener.filtersEmpty();
         updateList();
     }
 
@@ -273,12 +312,9 @@ public class FilterListAdapter extends BaseAdapter {
         mListener.updateImage(mItems);
     }
 
-    public void clearFilters() {
-        mHistoryBuffer.updateBuffer(mItems, null);
-        mItems.clear();
-        notifyDataSetChanged();
-        mListener.updateImage(mItems);
-        mListener.filtersEmpty();
+
+    public void enableHistory (Boolean bool) {
+        historyEnabled = bool;
     }
 
     public interface FilterListInterface {

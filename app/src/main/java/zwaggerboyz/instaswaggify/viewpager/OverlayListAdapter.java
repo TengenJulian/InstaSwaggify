@@ -7,12 +7,15 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import zwaggerboyz.instaswaggify.DataContainer;
 import zwaggerboyz.instaswaggify.HistoryBuffer;
 import zwaggerboyz.instaswaggify.MyGLSurfaceView;
 import zwaggerboyz.instaswaggify.Overlay;
 import zwaggerboyz.instaswaggify.R;
+import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
 
 /*
  * APP:     InstaSwaggify
@@ -30,6 +33,7 @@ public class OverlayListAdapter extends BaseAdapter implements MyGLSurfaceView.o
     private OverlayListInterface mListener;
     private List<Overlay> mItems;
     private HistoryBuffer mHistoryBuffer;
+    private boolean historyEnabled = true;
 
     private class ViewHolder {
         TextView titleTextView;
@@ -87,10 +91,10 @@ public class OverlayListAdapter extends BaseAdapter implements MyGLSurfaceView.o
 
     /* Removes item at index from filter list */
     public void remove(int index) {
-        mHistoryBuffer.updateBuffer(null, mItems);
-
         Overlay overlay =  mItems.remove(index);
-        overlay.close();
+        if (historyEnabled){
+            mHistoryBuffer.recordRemove(new DataContainer(overlay), index);
+        }
 
         mGLSurfaceView.requestRender();
         if (mItems.size() == 0)
@@ -100,7 +104,9 @@ public class OverlayListAdapter extends BaseAdapter implements MyGLSurfaceView.o
 
     public void reorder(int from, int to) {
         if (from != to) {
-            mHistoryBuffer.updateBuffer(null, mItems);
+            if (historyEnabled) {
+                mHistoryBuffer.recordReorder(from, to, DataContainer.DataType.OVERLAY_DATA);
+            }
             Overlay element = mItems.remove(from);
             mItems.add(to, element);
 
@@ -110,7 +116,9 @@ public class OverlayListAdapter extends BaseAdapter implements MyGLSurfaceView.o
     }
 
     public void addItem(Overlay overlay) {
-        mHistoryBuffer.updateBuffer(null, mItems);
+        if (historyEnabled) {
+            mHistoryBuffer.recordAdd(DataContainer.DataType.OVERLAY_DATA);
+        }
         mItems.add(0, overlay);
         mGLSurfaceView.addToCompileQueue(overlay);
         mGLSurfaceView.requestRender();
@@ -118,11 +126,23 @@ public class OverlayListAdapter extends BaseAdapter implements MyGLSurfaceView.o
         notifyDataSetChanged();
     }
 
-    public void clearOverlays() {
-        mHistoryBuffer.updateBuffer(null, mItems);
+    public void insertItem(Overlay overlay, int index) {
+        mItems.add(index, overlay);
+        mListener.overlaysNotEmpty();
+        mGLSurfaceView.requestRender();
+        notifyDataSetChanged();
+    }
 
-        for(Overlay overlay : mItems){
-            overlay.close();
+    public void changeValue(int index, float[] values) {
+        Overlay overlay = mItems.get(index);
+        overlay.setValues(values);
+        mListener.overlaysNotEmpty();
+        mGLSurfaceView.requestRender();
+    }
+
+    public void clearOverlays() {
+        if (historyEnabled) {
+            mHistoryBuffer.recordClear(new DataContainer(new ArrayList(mItems), DataContainer.DataType.OVERLAY_DATA));
         }
 
         mItems.clear();
@@ -132,24 +152,38 @@ public class OverlayListAdapter extends BaseAdapter implements MyGLSurfaceView.o
     }
 
     public void setItems(List<Overlay> items) {
-        for(Overlay overlay : mItems){
-            overlay.close();
+        if (historyEnabled) {
+            mHistoryBuffer.recordSet(new DataContainer(
+                    new ArrayList(mItems),
+                    DataContainer.DataType.FILTER_DATA
+            ));
         }
 
         mItems.clear();
         mItems.addAll(items);
+
+        if (mItems.size() == 0) {
+            mListener.overlaysEmpty();
+        }
+        else {
+            mListener.overlaysNotEmpty();
+        }
+
         mGLSurfaceView.requestRender();
         notifyDataSetChanged();
     }
 
     @Override
     public void updateBuffer() {
-        mHistoryBuffer.updateBuffer(null, mItems);
     }
 
     public void requestRender() {
         mGLSurfaceView.requestRender();
 
+    }
+
+    public void enableHistory (Boolean bool) {
+        historyEnabled = bool;
     }
 
     public interface OverlayListInterface {

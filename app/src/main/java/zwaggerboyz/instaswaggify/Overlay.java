@@ -129,6 +129,24 @@ public class Overlay extends TexturedSquare{
         public void updateBuffer();
     }
 
+    public void setValues(float values[]) {
+        this.angle = values[0];
+        this.scaleX = values[1];
+        this.scaleY = values[2];
+        this.centerX = values[3];
+        this.centerY = values[4];
+    }
+
+    public float[] getValues() {
+        float values[] = new float[5];
+        values[0] = this.angle;
+        values[1] = this.scaleX;
+        values[2] = this.scaleY;
+        values[3] = this.centerX;
+        values[4] = this.centerY;
+        return values;
+    }
+
     @Override
     public void close() {
 /*        Log.i("closing overlay", "");

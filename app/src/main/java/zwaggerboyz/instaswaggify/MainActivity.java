@@ -80,6 +80,7 @@ public class MainActivity extends FragmentActivity
         SlidingTabLayout slidingTabLayout = (SlidingTabLayout)findViewById(R.id.activity_main_tabs);
         mViewPager = (ViewPager) findViewById(R.id.activity_main_viewPager);
         mGLSurfaceView = (MyGLSurfaceView) findViewById(R.id.activity_main_glsurfaceview);
+        mGLSurfaceView.setHistoryBuffer(mHistoryBuffer);
         mRenderer = mGLSurfaceView.getRenderer();
         mRenderer.setActivity(this);
 
@@ -91,7 +92,7 @@ public class MainActivity extends FragmentActivity
         mFilterAdapter = new FilterListAdapter(this, this, new ArrayList<AbstractFilterClass>(), mHistoryBuffer);
         mOverlayAdapter = new OverlayListAdapter(this, this, mGLSurfaceView, overlays, mHistoryBuffer);
         mGLSurfaceView.setOverlays(overlays);
-        //mCanvasView.setOverlays(overlays);
+
         FragmentStatePagerAdapter pagerAdapter = new ListViewPagerAdapter(
                 getSupportFragmentManager(),
                 mFilterAdapter,

@@ -23,13 +23,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Filter;
 
 import zwaggerboyz.instaswaggify.dialogs.FilterDialog;
 import zwaggerboyz.instaswaggify.dialogs.OverlayDialog;
 import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
 import zwaggerboyz.instaswaggify.viewpager.FilterListAdapter;
-import zwaggerboyz.instaswaggify.viewpager.ListAdapter;
 import zwaggerboyz.instaswaggify.viewpager.ListViewPagerAdapter;
 import zwaggerboyz.instaswaggify.viewpager.OverlayListAdapter;
 import zwaggerboyz.instaswaggify.viewpager.SlidingTabLayout;
@@ -45,9 +43,7 @@ import zwaggerboyz.instaswaggify.viewpager.SlidingTabLayout;
  */
 
 public class MainActivity extends FragmentActivity
-        implements FilterListAdapter.FilterListInterface,
-                   OverlayListAdapter.OverlayListInterface,
-                   ViewPager.OnPageChangeListener,
+        implements ViewPager.OnPageChangeListener,
                    FilterDialog.OnAddFilterListener,
                    OverlayDialog.OnAddOverlayListener,
                    HistoryBuffer.UndoInterface,
@@ -288,43 +284,6 @@ public class MainActivity extends FragmentActivity
     void handleSendImage(Intent intent) {
         Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
         setImage(imageUri);
-    }
-
-    @Override
-    public void updateImage(List<AbstractFilterClass> filters) {
-        updateImage(filters, false);
-    }
-
-    @Override
-    public void updateImage(List<AbstractFilterClass> filters, boolean forceUpdate) {
-        mRenderer.setFilters(filters);
-        mGLSurfaceView.requestRender();
-    }
-
-    @Override
-    public void filtersEmpty() {
-        mMenu.findItem(R.id.action_preset_save).setEnabled(false);
-        if (mViewPager.getCurrentItem() == ListViewPagerAdapter.PAGE_FILTERS)
-            mMenu.findItem(R.id.action_clear).setEnabled(false);
-    }
-
-    @Override
-    public void filtersNotEmpty() {
-        mMenu.findItem(R.id.action_preset_save).setEnabled(true);
-        if (mViewPager.getCurrentItem() == ListViewPagerAdapter.PAGE_FILTERS)
-            mMenu.findItem(R.id.action_clear).setEnabled(true);
-    }
-
-    @Override
-    public void overlaysEmpty() {
-        if (mViewPager.getCurrentItem() == ListViewPagerAdapter.PAGE_OVERLAYS)
-            mMenu.findItem(R.id.action_clear).setEnabled(false);
-    }
-
-    @Override
-    public void overlaysNotEmpty() {
-        if (mViewPager.getCurrentItem() == ListViewPagerAdapter.PAGE_OVERLAYS)
-            mMenu.findItem(R.id.action_clear).setEnabled(true);
     }
 
     @Override

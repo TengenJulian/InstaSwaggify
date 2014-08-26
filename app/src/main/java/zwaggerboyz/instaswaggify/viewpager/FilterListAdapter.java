@@ -202,12 +202,6 @@ public class FilterListAdapter extends ListAdapter<AbstractFilterClass> {
         updateList();
     }
 
-    public interface FilterListInterface {
-        public void updateImage(List<AbstractFilterClass> filters);
-        public void updateImage(List<AbstractFilterClass> filters, boolean forceUpdate);
-        public void filtersEmpty();
-        public void filtersNotEmpty();
-    }
 }
 
 

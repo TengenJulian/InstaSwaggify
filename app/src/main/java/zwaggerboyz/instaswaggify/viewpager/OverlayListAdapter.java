@@ -60,8 +60,4 @@ public class OverlayListAdapter extends ListAdapter<Overlay> {
         updateList();
     }
 
-    public interface OverlayListInterface {
-        public void overlaysEmpty();
-        public void overlaysNotEmpty();
-    }
 }

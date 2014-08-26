@@ -2,6 +2,7 @@ package zwaggerboyz.instaswaggify;
 
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ public class FilterRenderer {
     private TexturedSquare mBackground;
     private List<AbstractFilterClass> mFilters = new ArrayList<AbstractFilterClass>();
     private IdentityFilter identity;
+    private boolean mRerender;
 
     public FilterRenderer(int width, int height, Bitmap background) {
         this.width = width;
@@ -50,6 +52,10 @@ public class FilterRenderer {
     public void setImage(Bitmap bitmap) {
         mBitmap = bitmap;
 
+    }
+
+    public void rerenderFilters() {
+        mRerender = true;
     }
 
     private void createFrameBuffers() {
@@ -91,6 +97,41 @@ public class FilterRenderer {
 
     }
 
+    public void exectureRerenderFilters(float[] mvpMatrix) {
+        int size = mFilters.size();
+
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBuffers[outputIndex]);
+        mBackground.draw(mvpMatrix);
+
+        inputIndex ^= 1;
+        outputIndex ^= 1;
+
+        for (int i = 0; i < size; i++) {
+            AbstractFilterClass filter = mFilters.get(i);
+
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, fboTextures[inputIndex]);
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBuffers[outputIndex]);
+
+            filter.draw(mvpMatrix, fboTextures[inputIndex]);
+
+            inputIndex  ^= 1;
+            outputIndex ^= 1;
+        }
+
+        if (size % 2 == 0) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, fboTextures[inputIndex]);
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBuffers[outputIndex]);
+
+            identity.draw(mvpMatrix, fboTextures[inputIndex]);
+
+
+            inputIndex  ^= 1;
+            outputIndex ^= 1;
+        }
+    }
+
     public void draw(float[] mvpMatrix) {
         if (mBitmap != null) {
             int[] scratch = {backgroundTex};
@@ -102,46 +143,23 @@ public class FilterRenderer {
             mBitmap = null;
         }
 
-        int size = mFilters.size();
-        int skip = 0;
-        if (size == 0) {
+        if (mFilters.size() == 0){
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
             mBackground.draw(mvpMatrix);
             return;
         }
-        else if (size % 2 == 0) {
-            skip = 1;
-        }
-
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBuffers[outputIndex]);
-        mBackground.draw(mvpMatrix);
-
-        inputIndex ^= 1;
-        outputIndex ^= 1;
-
-        for (int i = 0; i < size - skip; i++) {
-            AbstractFilterClass filter = mFilters.get(i);
-
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, fboTextures[inputIndex]);
-            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBuffers[outputIndex]);
-
-            filter.draw(mvpMatrix, fboTextures[inputIndex]);
-
-            inputIndex ^= 1;
-            outputIndex ^= 1;
+        else if (mRerender) {
+            exectureRerenderFilters(mvpMatrix);
+            mRerender = false;
         }
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, fboTextures[inputIndex]);
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
 
-        if (skip == 1) {
-            AbstractFilterClass filter = mFilters.get(size - 1);
-            filter.draw(mvpMatrix, fboTextures[inputIndex]);
-        }
-        else {
-            identity.draw(mvpMatrix, fboTextures[inputIndex]);
-        }
+        identity.draw(mvpMatrix, fboTextures[inputIndex]);
+
 
     }
 

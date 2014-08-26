@@ -16,6 +16,8 @@ import android.util.Log;
 import java.util.Arrays;
 
 
+import zwaggerboyz.instaswaggify.GLHelper;
+import zwaggerboyz.instaswaggify.MyGLRenderer;
 import zwaggerboyz.instaswaggify.TexturedSquare;
 
 public abstract class AbstractFilterClass extends TexturedSquare {
@@ -34,13 +36,20 @@ public abstract class AbstractFilterClass extends TexturedSquare {
         IDENTITY
     }
 
+    public AbstractFilterClass() {
+        imageWidth = MyGLRenderer.getWidth();
+        imageHeight = MyGLRenderer.getHeight();
+        baseScaleX = imageWidth / imageHeight;
+        baseScaleY = 1;
+    }
+
     protected FilterID mID;
     protected String mName;
     protected int mValues[];
     protected String mLabels[];
     protected int mNumValues;
-    protected int imageHeight;
-    protected int imageWidth;
+    protected float imageHeight;
+    protected float imageWidth;
 
     public String getName() {
         return mName;
@@ -74,7 +83,8 @@ public abstract class AbstractFilterClass extends TexturedSquare {
 
     /* set input value to the according value between the min and max value */
     public float normalizeValue(int value, float min, float max) {
-        return (float) ((max - min) * (value / 100.0) + min);
+        float ret = (float) ((max - min) * (value / 100.0) + min);
+        return ret;
     }
 
     public void setArray(int[] array) {
@@ -88,22 +98,12 @@ public abstract class AbstractFilterClass extends TexturedSquare {
     public int[] getArray() {
         int output[] = new int[mNumValues];
         System.arraycopy(mValues, 0, output, 0, mNumValues);
-        Log.i("filter values", Arrays.toString(output));
         return output;
     }
 
     public void draw(float[] mvpMatrix, int fboTexture) {
         setTextureDataHandle(fboTexture);
         super.draw(mvpMatrix);
-    }
-
-    @Override
-    public void allocateAndCompile() {
-    }
-
-    @Override
-    public AbstractFilterClass clone() {
-        return null;
     }
 
     public void setTextureDataHandle(int texture) {

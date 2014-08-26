@@ -58,7 +58,6 @@ public class FilterListAdapter extends BaseAdapter {
         return mItems.get(position);
     }
 
-
     @Override
     public long getItemId(int position) {
         return position;
@@ -311,7 +310,6 @@ public class FilterListAdapter extends BaseAdapter {
         notifyDataSetChanged();
         mListener.updateImage(mItems);
     }
-
 
     public void enableHistory (Boolean bool) {
         historyEnabled = bool;

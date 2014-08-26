@@ -28,6 +28,16 @@ public class DataContainer {
         this.dataType = dataType;
     }
 
+    public DataContainer(Object data, DataType dataType) {
+        this.dataType = dataType;
+        if (dataType == DataType.FILTER_DATA) {
+            this.filter = (AbstractFilterClass) data;
+        }
+        else {
+            this.overlay = (Overlay) data;
+        }
+    }
+
     public DataContainer(Overlay overlay) {
         dataType = DataType.OVERLAY_DATA;
         this.overlay = overlay;

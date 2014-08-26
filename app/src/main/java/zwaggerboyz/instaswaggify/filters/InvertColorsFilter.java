@@ -39,10 +39,8 @@ public class InvertColorsFilter extends AbstractFilterClass {
 
             "}";
 
+
     public InvertColorsFilter() {
-        super();
-        baseScaleX = MyGLRenderer.getWidth() / MyGLRenderer.getHeight();
-        baseScaleY = 1;
 
         mID = FilterID.INVERT;
         mName = "Invert Colors";
@@ -51,13 +49,10 @@ public class InvertColorsFilter extends AbstractFilterClass {
         Log.i("mProgram", mProgram + "");
     }
 
-    public static int ProgramStatic;
+    public static  int ProgramStatic;
 
-    public static void compileProgram(String vertexShaderCode, String fragmentShaderCode) {
+    public static void compileProgram() {
         ProgramStatic = compileProgramHelper(vertexShaderCode, fragmentShaderCode);
     }
-
-    //@Override
-    public void updateInternalValues() { }
 
 }

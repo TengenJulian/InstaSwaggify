@@ -37,6 +37,7 @@ public class GLHelper {
         GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, compileStatus, 0);
 
         if (compileStatus[0] == 0) {
+            Log.i("shader log:", GLES20.glGetShaderInfoLog(shader));
             if (type == GLES20.GL_VERTEX_SHADER){
                 throw new RuntimeException("Error compiling shader type: Vertex Shader");
             }

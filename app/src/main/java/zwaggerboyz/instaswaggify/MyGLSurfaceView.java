@@ -43,7 +43,6 @@ public class MyGLSurfaceView extends GLSurfaceView implements RotationGestureDet
 
     private float oldX;
     private float oldY;
-    private onOverlayChangeListener mListener;
 
     public MyGLSurfaceView(Context context) {
         super(context);
@@ -173,10 +172,6 @@ public class MyGLSurfaceView extends GLSurfaceView implements RotationGestureDet
         this.historyBuffer = historyBuffer;
     }
 
-    public void setOnOverlayChangeListener(onOverlayChangeListener listener) {
-        mListener = listener;
-    }
-
     public void addToCompileQueue(Overlay overlay) {
         mRenderer.addToCompileQueue(overlay);
     }
@@ -185,7 +180,4 @@ public class MyGLSurfaceView extends GLSurfaceView implements RotationGestureDet
         return mRenderer;
     }
 
-    public interface onOverlayChangeListener {
-        public void updateBuffer();
-    }
 }

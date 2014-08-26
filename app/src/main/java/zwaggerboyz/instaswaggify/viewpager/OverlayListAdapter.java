@@ -27,7 +27,7 @@ import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
  * This file contains the adapter to change the list of currently selected overlays.
  */
 
-public class OverlayListAdapter extends BaseAdapter implements MyGLSurfaceView.onOverlayChangeListener {
+public class OverlayListAdapter extends BaseAdapter {
     private LayoutInflater mInflater;
     private MyGLSurfaceView mGLSurfaceView;
     private OverlayListInterface mListener;
@@ -45,7 +45,6 @@ public class OverlayListAdapter extends BaseAdapter implements MyGLSurfaceView.o
         mGLSurfaceView = surfaceView;
         mItems = items;
         mHistoryBuffer = historyBuffer;
-        mGLSurfaceView.setOnOverlayChangeListener(this);
     }
 
     @Override
@@ -96,10 +95,9 @@ public class OverlayListAdapter extends BaseAdapter implements MyGLSurfaceView.o
             mHistoryBuffer.recordRemove(new DataContainer(overlay), index);
         }
 
-        mGLSurfaceView.requestRender();
         if (mItems.size() == 0)
             mListener.overlaysEmpty();
-        notifyDataSetChanged();
+        updateList();
     }
 
     public void reorder(int from, int to) {
@@ -110,8 +108,7 @@ public class OverlayListAdapter extends BaseAdapter implements MyGLSurfaceView.o
             Overlay element = mItems.remove(from);
             mItems.add(to, element);
 
-            mGLSurfaceView.requestRender();
-            notifyDataSetChanged();
+            updateList();
         }
     }
 
@@ -121,23 +118,23 @@ public class OverlayListAdapter extends BaseAdapter implements MyGLSurfaceView.o
         }
         mItems.add(0, overlay);
         mGLSurfaceView.addToCompileQueue(overlay);
-        mGLSurfaceView.requestRender();
         mListener.overlaysNotEmpty();
-        notifyDataSetChanged();
+
+        updateList();
     }
 
     public void insertItem(Overlay overlay, int index) {
         mItems.add(index, overlay);
         mListener.overlaysNotEmpty();
-        mGLSurfaceView.requestRender();
-        notifyDataSetChanged();
+
+        updateList();
     }
 
     public void changeValue(int index, float[] values) {
         Overlay overlay = mItems.get(index);
         overlay.setValues(values);
-        mListener.overlaysNotEmpty();
-        mGLSurfaceView.requestRender();
+
+        updateList();
     }
 
     public void clearOverlays() {
@@ -146,9 +143,8 @@ public class OverlayListAdapter extends BaseAdapter implements MyGLSurfaceView.o
         }
 
         mItems.clear();
-        mGLSurfaceView.requestRender();
         mListener.overlaysEmpty();
-        notifyDataSetChanged();
+        updateList();
     }
 
     public void setItems(List<Overlay> items) {
@@ -169,15 +165,11 @@ public class OverlayListAdapter extends BaseAdapter implements MyGLSurfaceView.o
             mListener.overlaysNotEmpty();
         }
 
-        mGLSurfaceView.requestRender();
+        updateList();
+    }
+
+    public void updateList() {
         notifyDataSetChanged();
-    }
-
-    @Override
-    public void updateBuffer() {
-    }
-
-    public void requestRender() {
         mGLSurfaceView.requestRender();
 
     }

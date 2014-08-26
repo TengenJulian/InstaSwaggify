@@ -18,6 +18,7 @@ package zwaggerboyz.instaswaggify;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -182,7 +183,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
         mExportHelper = new ExportHelper(mContext);
         // Set the background frame color
-        GLES20.glClearColor(0.3f, 0.0f, 0.0f, 1.0f);
+
+
+        int color = R.color.background;
+        int red = Color.red(color);
+        int green = Color.green(color);
+        int blue = Color.blue(color);
+        int alpha = Color.alpha(color);
+
+        red = green = blue = 63;
+
+        GLES20.glClearColor(1.f - red / 255.f, 1.f - green / 255.f,
+                            1.f - blue / 255.f, 1.f);
 
         // No culling of back faces
         GLES20.glDisable(GLES20.GL_CULL_FACE);
@@ -198,24 +210,28 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
+        // Draw background Color
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+
+
         // Allocates vertex, texture, and draw order buffer for TexturedSquare and all it's children.
         TexturedSquare.allocateBuffers();
-        TexturedSquare.compileProgram(TexturedSquare.vertexShaderCode, TexturedSquare.fragmentShaderCode);
+        TexturedSquare.compileProgram();
 
         BoundingBox.compileProgram(BoundingBox.vertexShaderCode, BoundingBox.fragmentShaderCode);
 
         // Compile all the filter programs
-        BrightnessFilter.compileProgram(BrightnessFilter.vertexShaderCode, BrightnessFilter.fragmentShaderCode);
-        ContrastFilter.compileProgram(ContrastFilter.vertexShaderCode, ContrastFilter.fragmentShaderCode);
-        GaussianBlurFilter.compileProgram(GaussianBlurFilter.vertexShaderCode, GaussianBlurFilter.fragmentShaderCode);
-        RotationFilter.compileProgram(RotationFilter.vertexShaderCode, RotationFilter.fragmentShaderCode);
-        SaturationFilter.compileProgram(SaturationFilter.vertexShaderCode, SaturationFilter.fragmentShaderCode);
-        SepiaFilter.compileProgram(SepiaFilter.vertexShaderCode, SepiaFilter.fragmentShaderCode);
-        NoiseFilter.compileProgram(NoiseFilter.vertexShaderCode, NoiseFilter.fragmentShaderCode);
-        InvertColorsFilter.compileProgram(InvertColorsFilter.vertexShaderCode, InvertColorsFilter.fragmentShaderCode);
-        ColorizeFilter.compileProgram(ColorizeFilter.vertexShaderCode, ColorizeFilter.fragmentShaderCode);
-        ThresholdBlurFilter.compileProgram(ThresholdBlurFilter.vertexShaderCode, ThresholdBlurFilter.fragmentShaderCode);
-        IdentityFilter.compileProgram(IdentityFilter.vertexShaderCode, IdentityFilter.fragmentShaderCode);
+        BrightnessFilter.compileProgram();
+        ContrastFilter.compileProgram();
+        GaussianBlurFilter.compileProgram();
+        RotationFilter.compileProgram();
+        SaturationFilter.compileProgram();
+        SepiaFilter.compileProgram();
+        NoiseFilter.compileProgram();
+        InvertColorsFilter.compileProgram();
+        ColorizeFilter.compileProgram();
+        ThresholdBlurFilter.compileProgram();
+        IdentityFilter.compileProgram();
 
         clearCache();
     }
@@ -340,6 +356,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public void setFilters(List<AbstractFilterClass> filters) {
         filterRenderer.setFilters(filters);
+        filterRenderer.rerenderFilters();
     }
 
     public void addToCompileQueue(Overlay overlay) {

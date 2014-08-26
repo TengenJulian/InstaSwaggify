@@ -11,6 +11,8 @@ package zwaggerboyz.instaswaggify.filters;
  * stores the values of the slider.
  */
 
+import android.opengl.GLES20;
+
 public class RotationFilter extends AbstractFilterClass {
 
     public RotationFilter() {
@@ -27,6 +29,18 @@ public class RotationFilter extends AbstractFilterClass {
         mValues = new int[] {
                 0
         };
+    }
+
+    @Override
+    public void specifyExtraVariables() {
+        setAngle(normalizeValue(mValues[0], 0.f, 360.f));
+    }
+
+    @Override
+    public void draw(float[] mvpMatrix, int fboTexture) {
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        setTextureDataHandle(fboTexture);
+        super.draw(mvpMatrix);
     }
 
 /*    //@Override

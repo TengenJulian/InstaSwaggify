@@ -12,7 +12,30 @@ package zwaggerboyz.instaswaggify.filters;
  * stores the values of the sliders.
  */
 
+import android.opengl.GLES20;
+import android.util.Log;
+
+import zwaggerboyz.instaswaggify.GLHelper;
+
 public class SepiaFilter extends AbstractFilterClass {
+    public final static String fragmentShaderCode =
+            "precision mediump float;" +
+
+            "const vec3 gMonoMult = vec3(0.299, 0.587, 0.114);" +
+
+            "uniform float depth;" +
+            "uniform float intensity;" +
+            "uniform sampler2D u_Texture;" +
+            "varying vec2 TexCoordinate;" +
+
+            "void main() {" +
+            "	vec4 texColor = texture2D(u_Texture, TexCoordinate);" +
+            "	vec3 luma = vec3(dot(texColor.xyz, gMonoMult));" +
+            "	gl_FragColor = vec4(luma + vec3(depth * 2, depth, -intensity), 1.0);" +
+            "}";
+
+    private static int ProgramStatic;
+    private int mIntensityHandle, mDepthHandle;
 
     public SepiaFilter() {
         mID = FilterID.SEPIA;
@@ -30,13 +53,20 @@ public class SepiaFilter extends AbstractFilterClass {
                 10,
                 20
         };
+
+        mProgram = ProgramStatic;
     }
 
-    //@Override
-/*    public void updateInternalValues() {
-        mScript.set_intensity(normalizeValue(mValues[0], 0.05f, 0.4f));
-        mScript.set_depth(normalizeValue(mValues[1], 0.f, 0.5f));
-        mScript.invoke_calculateVector();
-    }*/
+    public static void compileProgram() {
+        ProgramStatic = compileProgramHelper(vertexShaderCode, fragmentShaderCode);
+    }
 
+    @Override
+    public void specifyExtraVariables() {
+        mIntensityHandle = GLES20.glGetUniformLocation(mProgram, "intensity");
+        mDepthHandle = GLES20.glGetUniformLocation(mProgram, "depth");
+
+        GLES20.glUniform1f(mDepthHandle, normalizeValue(mValues[1], 0.0f, 0.5f));
+        GLES20.glUniform1f(mIntensityHandle, normalizeValue(mValues[0], 0.05f, 0.4f));
+    }
 }

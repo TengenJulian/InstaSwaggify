@@ -25,9 +25,11 @@ import java.util.Date;
 import java.util.List;
 
 import zwaggerboyz.instaswaggify.dialogs.FilterDialog;
+import zwaggerboyz.instaswaggify.viewpager.ListAdapterInstance;
 import zwaggerboyz.instaswaggify.dialogs.OverlayDialog;
 import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
 import zwaggerboyz.instaswaggify.viewpager.FilterListAdapter;
+import zwaggerboyz.instaswaggify.viewpager.ListAdapter;
 import zwaggerboyz.instaswaggify.viewpager.ListViewPagerAdapter;
 import zwaggerboyz.instaswaggify.viewpager.OverlayListAdapter;
 import zwaggerboyz.instaswaggify.viewpager.SlidingTabLayout;
@@ -367,4 +369,48 @@ public class MainActivity extends FragmentActivity
 
     @Override
     public void onPageScrollStateChanged(int state) { }
+
+    private class FilterChangeListener extends ListAdapterInstance.ListChangeListener {
+
+        @Override
+        public void updateImage(List elements) {
+            mRenderer.setFilters(elements);
+            mGLSurfaceView.requestRender();
+        }
+
+        @Override
+        public void listEmpty() {
+            mMenu.findItem(R.id.action_preset_save).setEnabled(false);
+            if (mViewPager.getCurrentItem() == ListViewPagerAdapter.PAGE_FILTERS)
+                mMenu.findItem(R.id.action_clear).setEnabled(false);
+        }
+
+        @Override
+        public void listNotEmpty() {
+            mMenu.findItem(R.id.action_preset_save).setEnabled(true);
+            if (mViewPager.getCurrentItem() == ListViewPagerAdapter.PAGE_FILTERS)
+                mMenu.findItem(R.id.action_clear).setEnabled(true);
+        }
+    }
+
+    private class OverlayChangeListener extends ListAdapterInstance.ListChangeListener {
+
+        @Override
+        public void updateImage(List elements) {
+            mRenderer.setOverlays(elements);
+            mGLSurfaceView.requestRender();
+        }
+
+        @Override
+        public void listEmpty() {
+            if (mViewPager.getCurrentItem() == ListViewPagerAdapter.PAGE_OVERLAYS)
+                mMenu.findItem(R.id.action_clear).setEnabled(false);
+        }
+
+        @Override
+        public void listNotEmpty() {
+            if (mViewPager.getCurrentItem() == ListViewPagerAdapter.PAGE_OVERLAYS)
+                mMenu.findItem(R.id.action_clear).setEnabled(true);
+        }
+    }
 }

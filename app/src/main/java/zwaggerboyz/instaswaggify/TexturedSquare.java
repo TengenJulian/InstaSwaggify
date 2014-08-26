@@ -179,7 +179,7 @@ public class TexturedSquare {
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
-    public static void compileProgram(String vertexShaderCode, String fragmentShaderCode) {
+    public static void compileProgram() {
         ProgramStatic = compileProgramHelper(vertexShaderCode, fragmentShaderCode);
     }
 
@@ -257,14 +257,12 @@ public class TexturedSquare {
      * this shape.
      */
     public void draw(float[] mvpMatrix) {
-        calcTransformation();
-        Matrix.multiplyMM(scratch, 0, mvpMatrix, 0, transformationMatrix, 0);
-        Matrix.multiplyMM(boundingBox, 0, transformationMatrix, 0, squareCoords2, 0);
-
-
         GLES20.glUseProgram(mProgram);
         specifyVariableHandles();
 
+        calcTransformation();
+        Matrix.multiplyMM(scratch, 0, mvpMatrix, 0, transformationMatrix, 0);
+        Matrix.multiplyMM(boundingBox, 0, transformationMatrix, 0, squareCoords2, 0);
 
         // Apply the projection and view transformation
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, scratch, 0);
@@ -357,6 +355,10 @@ public class TexturedSquare {
     public void setCenter(float centerX, float centerY) {
         this.centerX = centerX;
         this.centerY = centerY;
+    }
+
+    public void setAngle(float angle) {
+        this.angle = angle;
     }
 
     public void setTextureDataHandle(int texture) {

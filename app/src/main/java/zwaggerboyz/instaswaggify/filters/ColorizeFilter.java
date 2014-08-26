@@ -12,7 +12,23 @@ package zwaggerboyz.instaswaggify.filters;
  * the values of the sliders.
  */
 
+import android.opengl.GLES20;
+
 public class ColorizeFilter extends AbstractFilterClass {
+    public static final String fragmentShaderCode =
+            "precision mediump float;" +
+
+            "uniform vec3 color;" +
+            "uniform sampler2D u_Texture;" +
+            "varying vec2 TexCoordinate;" +
+
+            "void main() {" +
+            "	gl_FragColor = texture2D(u_Texture, TexCoordinate) + vec4(color, 0.0);" +
+            "}";
+    private static int ProgramStatic;
+    private int mColorHandle;
+    private static float[] scratch = new float[3];
+
     public ColorizeFilter() {
         mID = FilterID.COLORIZE;
         mName = "Colorize";
@@ -31,13 +47,23 @@ public class ColorizeFilter extends AbstractFilterClass {
                 0,
                 0
         };
+
+        mProgram = ProgramStatic;
     }
 
-    //@Override
-    /*public void updateInternalValues() {
-        mScript.set_redValue(normalizeValue(mValues[0], 0.f, 1.f));
-        mScript.set_greenValue(normalizeValue(mValues[1], 0.f, 1.f));
-        mScript.set_blueValue(normalizeValue(mValues[2], 0.f, 1.f));
-    }*/
+    public static void compileProgram() {
+        ProgramStatic = compileProgramHelper(vertexShaderCode, fragmentShaderCode);
+    }
+
+    @Override
+    public void specifyExtraVariables() {
+        mColorHandle = GLES20.glGetUniformLocation(mProgram, "color");
+
+        scratch[0] = mValues[0] / 100.f;
+        scratch[1] = mValues[1] / 100.f;
+        scratch[2] = mValues[2] / 100.f;
+
+        GLES20.glUniform3fv(mColorHandle, 1, scratch, 0);
+    }
 
 }

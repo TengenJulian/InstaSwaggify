@@ -62,7 +62,5 @@ public class SaturationFilter extends AbstractFilterClass {
         mSaturationValueHandle = GLES20.glGetUniformLocation(mProgram, "saturationValue");
         GLES20.glUniform1f(mSaturationValueHandle, normalizeValue(mValues[0], 0.f, 2.f));
     }
-/*    public void updateInternalValues() {
-        mScript.set_saturationValue(normalizeValue(mValues[0], 0.f, 2.f));
-    }*/
+
 }

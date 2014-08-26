@@ -27,7 +27,6 @@ public class ColorizeFilter extends AbstractFilterClass {
             "}";
     private static int ProgramStatic;
     private int mColorHandle;
-    private static float[] scratch = new float[3];
 
     public ColorizeFilter() {
         mID = FilterID.COLORIZE;
@@ -59,11 +58,11 @@ public class ColorizeFilter extends AbstractFilterClass {
     public void specifyExtraVariables() {
         mColorHandle = GLES20.glGetUniformLocation(mProgram, "color");
 
-        scratch[0] = mValues[0] / 100.f;
-        scratch[1] = mValues[1] / 100.f;
-        scratch[2] = mValues[2] / 100.f;
-
-        GLES20.glUniform3fv(mColorHandle, 1, scratch, 0);
+        GLES20.glUniform3f(mColorHandle,
+                mValues[0] / 100f,
+                mValues[1] / 100f,
+                mValues[2] / 100f
+        );
     }
 
 }

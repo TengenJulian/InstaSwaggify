@@ -43,12 +43,4 @@ public class RotationFilter extends AbstractFilterClass {
         super.draw(mvpMatrix);
     }
 
-/*    //@Override
-    public void updateInternalValues() {
-        mScript.set_rotationAngle(normalizeValue(mValues[0], 0.f, 360.f));
-        mScript.set_imageWidth(imageWidth);
-        mScript.set_imageHeight(imageHeight);
-        mScript.invoke_calculateMatrix();
-    }*/
-
 }

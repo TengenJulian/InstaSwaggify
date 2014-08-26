@@ -17,7 +17,6 @@ public class DataContainer {
     List<AbstractFilterClass> filters;
 
     float[] floatValues;
-    int[] intValues;
 
     public enum DataType {
         OVERLAY_DATA,
@@ -58,13 +57,9 @@ public class DataContainer {
         }
     }
 
-    public DataContainer(float[] data) {
-        this.dataType = DataType.OVERLAY_DATA;
+    public DataContainer(float[] data, DataType dataType) {
+        this.dataType = dataType;
         floatValues = data;
     }
 
-    public DataContainer(int[] data) {
-        this.dataType = DataType.FILTER_DATA;
-        intValues = data;
-    }
 }

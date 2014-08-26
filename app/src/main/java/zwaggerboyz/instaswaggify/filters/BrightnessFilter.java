@@ -42,8 +42,8 @@ public class BrightnessFilter extends AbstractFilterClass {
         };
 
         /* slider default value */
-        mValues = new int[] {
-                33
+        mValues = new float[] {
+                33f
         };
 
         mProgram = ProgramStatic;

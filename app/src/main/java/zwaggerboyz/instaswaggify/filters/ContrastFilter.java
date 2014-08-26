@@ -43,8 +43,8 @@ public class ContrastFilter extends AbstractFilterClass {
         };
 
         /* slider default value */
-        mValues = new int[] {
-                11
+        mValues = new float[] {
+                11f
         };
 
         mProgram = ProgramStatic;

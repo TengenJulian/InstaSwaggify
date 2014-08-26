@@ -42,10 +42,10 @@ public class ColorizeFilter extends AbstractFilterClass {
         };
 
         /* slider default values */
-        mValues = new int[] {
-                0,
-                0,
-                0
+        mValues = new float[] {
+                0f,
+                0f,
+                0f
         };
 
         mProgram = ProgramStatic;

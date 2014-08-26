@@ -104,7 +104,7 @@ public class MyGLSurfaceView extends GLSurfaceView implements RotationGestureDet
                 mSelected = mRenderer.getSelection(-newX, newY);
                 if (mSelected != null) {
                     Log.i("Action Down", "selection found");
-                    historyBuffer.recordValueChange(new DataContainer(mSelected.getValues()), mSelectedIndex);
+                    historyBuffer.recordValueChange(new DataContainer(mSelected.getValues(), DataContainer.DataType.OVERLAY_DATA), mSelectedIndex);
                 }
 
                 return true;

@@ -26,8 +26,8 @@ public class RotationFilter extends AbstractFilterClass {
         };
 
         /* slider default value */
-        mValues = new int[] {
-                0
+        mValues = new float[] {
+                0f
         };
     }
 

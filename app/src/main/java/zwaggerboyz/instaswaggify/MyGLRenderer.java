@@ -141,6 +141,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     public static void loadCachedTextureResource(Overlay overlay, Context context) {
+        Log.i("texture cache", "called");
         int textureId = overlay.getTextureId();
         int textureDataHandle = TEXTURE_DATA_HANDLES[textureId];
         int width, height;

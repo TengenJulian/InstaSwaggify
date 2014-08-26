@@ -15,7 +15,6 @@ import zwaggerboyz.instaswaggify.HistoryBuffer;
 import zwaggerboyz.instaswaggify.MyGLSurfaceView;
 import zwaggerboyz.instaswaggify.Overlay;
 import zwaggerboyz.instaswaggify.R;
-import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
 
 /*
  * APP:     InstaSwaggify
@@ -27,44 +26,15 @@ import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
  * This file contains the adapter to change the list of currently selected overlays.
  */
 
-public class OverlayListAdapter extends BaseAdapter {
-    private LayoutInflater mInflater;
-    private MyGLSurfaceView mGLSurfaceView;
-    private OverlayListInterface mListener;
-    private List<Overlay> mItems;
-    private HistoryBuffer mHistoryBuffer;
-    private boolean historyEnabled = true;
+public class OverlayListAdapter extends ListAdapter<Overlay> {
 
     private class ViewHolder {
         TextView titleTextView;
     }
 
-    public OverlayListAdapter(Activity activity, OverlayListInterface listener, MyGLSurfaceView surfaceView, List<Overlay> items, HistoryBuffer historyBuffer) {
-        mInflater = activity.getLayoutInflater();
-        mListener = listener;
-        mGLSurfaceView = surfaceView;
-        mItems = items;
-        mHistoryBuffer = historyBuffer;
-    }
-
-    @Override
-    public int getCount() {
-        return mItems.size();
-    }
-
-    @Override
-    public Overlay getItem(int position) {
-        return mItems.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public boolean hasStableIds(){
-        return true;
+    public OverlayListAdapter(Activity activity, ListChangeListener listener, List<Overlay> items, HistoryBuffer historyBuffer) {
+        super(activity, listener, items, historyBuffer);
+        dataType = DataContainer.DataType.OVERLAY_DATA;
     }
 
     @Override
@@ -84,98 +54,10 @@ public class OverlayListAdapter extends BaseAdapter {
         return convertView;
     }
 
-    public List<Overlay> getItems() {
-        return mItems;
-    }
-
-    /* Removes item at index from filter list */
-    public void remove(int index) {
-        Overlay overlay =  mItems.remove(index);
-        if (historyEnabled){
-            mHistoryBuffer.recordRemove(new DataContainer(overlay), index);
-        }
-
-        if (mItems.size() == 0)
-            mListener.overlaysEmpty();
-        updateList();
-    }
-
-    public void reorder(int from, int to) {
-        if (from != to) {
-            if (historyEnabled) {
-                mHistoryBuffer.recordReorder(from, to, DataContainer.DataType.OVERLAY_DATA);
-            }
-            Overlay element = mItems.remove(from);
-            mItems.add(to, element);
-
-            updateList();
-        }
-    }
-
-    public void addItem(Overlay overlay) {
-        if (historyEnabled) {
-            mHistoryBuffer.recordAdd(DataContainer.DataType.OVERLAY_DATA);
-        }
-        mItems.add(0, overlay);
-        mGLSurfaceView.addToCompileQueue(overlay);
-        mListener.overlaysNotEmpty();
-
-        updateList();
-    }
-
-    public void insertItem(Overlay overlay, int index) {
-        mItems.add(index, overlay);
-        mListener.overlaysNotEmpty();
-
-        updateList();
-    }
-
-    public void changeValue(int index, float[] values) {
-        Overlay overlay = mItems.get(index);
+    @Override
+    public void changeValues(Overlay overlay, float[] values) {
         overlay.setValues(values);
-
         updateList();
-    }
-
-    public void clearOverlays() {
-        if (historyEnabled) {
-            mHistoryBuffer.recordClear(new DataContainer(new ArrayList(mItems), DataContainer.DataType.OVERLAY_DATA));
-        }
-
-        mItems.clear();
-        mListener.overlaysEmpty();
-        updateList();
-    }
-
-    public void setItems(List<Overlay> items) {
-        if (historyEnabled) {
-            mHistoryBuffer.recordSet(new DataContainer(
-                    new ArrayList(mItems),
-                    DataContainer.DataType.FILTER_DATA
-            ));
-        }
-
-        mItems.clear();
-        mItems.addAll(items);
-
-        if (mItems.size() == 0) {
-            mListener.overlaysEmpty();
-        }
-        else {
-            mListener.overlaysNotEmpty();
-        }
-
-        updateList();
-    }
-
-    public void updateList() {
-        notifyDataSetChanged();
-        mGLSurfaceView.requestRender();
-
-    }
-
-    public void enableHistory (Boolean bool) {
-        historyEnabled = bool;
     }
 
     public interface OverlayListInterface {

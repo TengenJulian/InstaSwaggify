@@ -45,7 +45,7 @@ public abstract class AbstractFilterClass extends TexturedSquare {
 
     protected FilterID mID;
     protected String mName;
-    protected int mValues[];
+    protected float mValues[];
     protected String mLabels[];
     protected int mNumValues;
     protected float imageHeight;
@@ -67,7 +67,7 @@ public abstract class AbstractFilterClass extends TexturedSquare {
         }
     }
 
-    public int getValue(int i) {
+    public float getValue(int i) {
         if (i < mNumValues) {
             return mValues[i];
         } else {
@@ -82,21 +82,21 @@ public abstract class AbstractFilterClass extends TexturedSquare {
     }
 
     /* set input value to the according value between the min and max value */
-    public float normalizeValue(int value, float min, float max) {
+    public float normalizeValue(float value, float min, float max) {
         float ret = (float) ((max - min) * (value / 100.0) + min);
         return ret;
     }
 
-    public void setArray(int[] array) {
+    public void setArray(float[] array) {
         if (array.length > 0) {
             System.arraycopy(array, 0, mValues, 0, mNumValues);
         } else {
-            mValues = new int[mNumValues];
+            mValues = new float[mNumValues];
         }
     }
 
-    public int[] getArray() {
-        int output[] = new int[mNumValues];
+    public float[] getArray() {
+        float output[] = new float[mNumValues];
         System.arraycopy(mValues, 0, output, 0, mNumValues);
         return output;
     }

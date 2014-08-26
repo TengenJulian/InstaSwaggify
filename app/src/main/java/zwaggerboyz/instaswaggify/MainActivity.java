@@ -23,9 +23,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Filter;
 
 import zwaggerboyz.instaswaggify.dialogs.FilterDialog;
-import zwaggerboyz.instaswaggify.viewpager.ListAdapterInstance;
 import zwaggerboyz.instaswaggify.dialogs.OverlayDialog;
 import zwaggerboyz.instaswaggify.filters.AbstractFilterClass;
 import zwaggerboyz.instaswaggify.viewpager.FilterListAdapter;
@@ -91,8 +91,8 @@ public class MainActivity extends FragmentActivity
 
 
         List<Overlay> overlays = new ArrayList<Overlay>();
-        mFilterAdapter = new FilterListAdapter(this, this, new ArrayList<AbstractFilterClass>(), mHistoryBuffer);
-        mOverlayAdapter = new OverlayListAdapter(this, this, mGLSurfaceView, overlays, mHistoryBuffer);
+        mFilterAdapter = new FilterListAdapter(this, new FilterChangeListener(), new ArrayList<AbstractFilterClass>(), mHistoryBuffer);
+        mOverlayAdapter = new OverlayListAdapter(this, new OverlayChangeListener(), overlays, mHistoryBuffer);
         mGLSurfaceView.setOverlays(overlays);
 
         FragmentStatePagerAdapter pagerAdapter = new ListViewPagerAdapter(
@@ -132,8 +132,8 @@ public class MainActivity extends FragmentActivity
                     Toast.LENGTH_SHORT).show();
             return;
         }
-        mOverlayAdapter.clearOverlays();
-        mFilterAdapter.clearFilters();
+        mOverlayAdapter.clear();
+        mFilterAdapter.clear();
     }
 
     @Override
@@ -247,9 +247,9 @@ public class MainActivity extends FragmentActivity
 
             case R.id.action_clear: {
                 if (mViewPager.getCurrentItem() == ListViewPagerAdapter.PAGE_FILTERS)
-                    mFilterAdapter.clearFilters();
+                    mFilterAdapter.clear();
                 else if (mViewPager.getCurrentItem() == ListViewPagerAdapter.PAGE_OVERLAYS)
-                    mOverlayAdapter.clearOverlays();
+                    mOverlayAdapter.clear();
                 return true;
             }
         }
@@ -370,7 +370,12 @@ public class MainActivity extends FragmentActivity
     @Override
     public void onPageScrollStateChanged(int state) { }
 
-    private class FilterChangeListener extends ListAdapterInstance.ListChangeListener {
+    private class FilterChangeListener extends FilterListAdapter.ListChangeListener {
+
+        @Override
+        public void prepareElement(Object element) {
+
+        }
 
         @Override
         public void updateImage(List elements) {
@@ -393,7 +398,12 @@ public class MainActivity extends FragmentActivity
         }
     }
 
-    private class OverlayChangeListener extends ListAdapterInstance.ListChangeListener {
+    private class OverlayChangeListener extends OverlayListAdapter.ListChangeListener {
+
+        @Override
+        public void prepareElement(Object element) {
+            mRenderer.addToCompileQueue((Overlay)element);
+        }
 
         @Override
         public void updateImage(List elements) {
@@ -412,5 +422,7 @@ public class MainActivity extends FragmentActivity
             if (mViewPager.getCurrentItem() == ListViewPagerAdapter.PAGE_OVERLAYS)
                 mMenu.findItem(R.id.action_clear).setEnabled(true);
         }
+
+
     }
 }

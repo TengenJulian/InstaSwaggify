@@ -46,8 +46,8 @@ public class SaturationFilter extends AbstractFilterClass {
         mLabels = new String[] {
                 "intensity"
         };
-        mValues = new int[] {
-            50
+        mValues = new float[] {
+            50f
         };
 
         mProgram = ProgramStatic;

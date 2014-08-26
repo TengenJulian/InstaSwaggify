@@ -61,11 +61,11 @@ public class HistoryBuffer {
                     break;
                 }
                 case SET: {
-                    filterListAdapter.clearFilters();
+                    filterListAdapter.clear();
                     break;
                 }
                 case VALUE_CHANGE: {
-                    filterListAdapter.changeValue(state.from, state.data.intValues);
+                    filterListAdapter.changeValue(state.from, state.data.floatValues);
                     break;
                 }
             }
@@ -98,7 +98,7 @@ public class HistoryBuffer {
                 }
 
                 case SET: {
-                    overlayListAdapter.clearOverlays();
+                    overlayListAdapter.clear();
                     break;
                 }
                 case VALUE_CHANGE: {
